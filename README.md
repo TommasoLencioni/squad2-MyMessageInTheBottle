@@ -27,7 +27,7 @@ University of Pisa.
 To setup the project initially you have to run these commands
 inside the project's root.
 
-`virtualenv -p python3 venv`
+`python3 -m venv venv`
 
 `source venv/bin/activate`
 
