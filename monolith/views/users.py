@@ -50,7 +50,8 @@ def send():
             sender= db.session.query(User).filter(User.id == current_user.id)
             new_message.sender_id=sender.first().id
             print(new_message.sender_id)
-            return redirect('/users')
+            #TODO  finish to populate
+            return redirect('/users') #TOFIX This redirect is a stub
     elif request.method == 'GET':
         if current_user is not None and hasattr(current_user, 'id'):
             q = db.session.query(User).filter(User.id == current_user.id)
