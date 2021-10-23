@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, render_template, request
 
 from monolith.database import User, db
-from monolith.forms import UserForm
+from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
 
 users = Blueprint('users', __name__)
@@ -41,7 +41,8 @@ def send():
         q = db.session.query(User).filter(User.id == current_user.id)
         #print(q.firstname)
         print(q.first().firstname)
-        return render_template("send.html", current_user=q.first().firstname)
+        form = SendForm()
+        return render_template("send.html", current_user=q.first().firstname, form=form)
     else:
         welcome = None
         return render_template("index.html", welcome=welcome)

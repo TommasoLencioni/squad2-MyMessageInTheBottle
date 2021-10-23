@@ -16,3 +16,8 @@ class UserForm(FlaskForm):
     password = f.PasswordField('password', validators=[DataRequired()])
     dateofbirth = f.DateField('dateofbirth', format='%d/%m/%Y')
     display = ['email', 'firstname', 'lastname', 'password', 'dateofbirth']
+
+class SendForm(FlaskForm):
+    recipient = f.StringField('recipient', validators=[DataRequired()])
+    message = f.TextAreaField('message', validators=[DataRequired()])
+    display = ['recipient', 'message']
