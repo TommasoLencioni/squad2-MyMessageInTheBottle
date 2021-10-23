@@ -20,7 +20,9 @@ class User(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     is_admin = db.Column(db.Boolean, default=False)
     is_anonymous = False
-
+   # blacklist = db.Column(db.Enum(db.Integer)) #This enum contains the id of the users that this user blacklisted
+    #we need to define a class Enum.
+    
     def __init__(self, *args, **kw):
         super(User, self).__init__(*args, **kw)
         self._authenticated = False
@@ -41,5 +43,19 @@ class User(db.Model):
         return self.id
 
 
-class message():
-    
+class message(db.Model):
+    __tablename__ = 'message'
+
+    message_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    sender_id = db.Column(db.Integer, nullable=False)
+    receiver_id = db.Column(db.Integer, nullable=False)
+    delivery_date = db.Column(db.DateTime)
+    creation_date = db.Column(db.DateTime)
+    is_draft = db.Column(db.Boolean, nullable=True)
+    text = db.Column(db.Unicode(128))
+
+
+    def __init__(self, *args, **kw):
+        super(User, self).__init__(*args, **kw)
+        self._authenticated = False
+ 
