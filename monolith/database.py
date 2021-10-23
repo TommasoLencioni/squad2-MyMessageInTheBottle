@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.datastructures import K
 from werkzeug.security import check_password_hash, generate_password_hash
 
 db = SQLAlchemy()
@@ -59,3 +60,4 @@ class message(db.Model):
         super(User, self).__init__(*args, **kw)
         self._authenticated = False
  
+ #####
