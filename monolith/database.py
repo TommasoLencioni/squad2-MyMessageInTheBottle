@@ -14,6 +14,9 @@ class User(db.Model):
     lastname = db.Column(db.Unicode(128))
     password = db.Column(db.Unicode(128))
     date_of_birth = db.Column(db.DateTime)
+    location = db.Column(db.Unicode(128))
+    nickname = db.Column(db.Unicode(128))
+    propic = db.Column(db.Unicode(128))
     is_active = db.Column(db.Boolean, default=True)
     is_admin = db.Column(db.Boolean, default=False)
     is_anonymous = False
@@ -37,3 +40,6 @@ class User(db.Model):
     def get_id(self):
         return self.id
 
+
+class message():
+    
