@@ -43,7 +43,7 @@ class User(db.Model):
         return self.id
 
 
-class message(db.Model):
+class Message(db.Model):
     __tablename__ = 'message'
 
     message_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -52,10 +52,9 @@ class message(db.Model):
     delivery_date = db.Column(db.DateTime)
     creation_date = db.Column(db.DateTime)
     is_draft = db.Column(db.Boolean, nullable=True)
-    text = db.Column(db.Unicode(128))
+    body = db.Column(db.Unicode(128))
 
 
     def __init__(self, *args, **kw):
-        super(User, self).__init__(*args, **kw)
-        self._authenticated = False
+        super(Message, self).__init__(*args, **kw)
  
