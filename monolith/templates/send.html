@@ -1,2 +1,23 @@
-<h1>send page</h1>
-<h2>{{current_user}}</h2>
+<html>
+    <body>
+        <h1>Write a message</h1>
+        <h2>{{current_user}}</h2>
+        <form action="" method="POST">
+            {{ form.hidden_tag() }}
+            <dl>
+            {% for field in form.display %}
+            <dt>{{ form[field].label }}</dt>
+            <dd>{{ form[field]() }}</dd>
+            {% if form[field].errors %}
+                {% for e in form[field].errors %}
+                <p class="help-block">{{ e }}</p>
+                {% endfor %}
+            {% endif %}
+            {% endfor %}
+            </dl>
+            <p>
+            <input type=submit value="Save as draft " style="height:40px; width:150px">
+            <input type=submit value="Send" style="height:40px; width:150px">
+        </form>
+    </body>
+</html>
