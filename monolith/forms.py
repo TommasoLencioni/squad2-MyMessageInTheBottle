@@ -18,6 +18,7 @@ class UserForm(FlaskForm):
     display = ['email', 'firstname', 'lastname', 'password', 'dateofbirth']
 
 class SendForm(FlaskForm):
-    recipient = f.StringField('recipient', validators=[DataRequired()])
-    message = f.TextAreaField('message', validators=[DataRequired()])
-    display = ['recipient', 'message']
+    recipient = f.StringField('Recipient', validators=[DataRequired()])
+    body = f.TextAreaField('Message', validators=[DataRequired()])
+    delivery_date = f.DateField('Delivery date', format='%d/%m/%Y')
+    display = ['recipient', 'body', 'delivery_date']

@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, render_template, request
 
-from monolith.database import User, db
+from monolith.database import User, db, Message
 from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
 
@@ -35,16 +35,30 @@ def create_user():
     else:
         raise RuntimeError('This should not happen!')
 
-@users.route('/send')
+@users.route('/send', methods=['POST', 'GET'])
 def send():
-    if current_user is not None and hasattr(current_user, 'id'):
-        q = db.session.query(User).filter(User.id == current_user.id)
-        #print(q.firstname)
-        print(q.first().firstname)
-        form = SendForm()
-        return render_template("send.html", current_user=q.first().firstname, form=form)
-    else:
-        welcome = None
-        return render_template("index.html", welcome=welcome)
+    form = SendForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            new_message = Message()
+            form.populate_obj(new_message)
+            print(new_message.receiver_id)
+            print('Text should be here' + new_message.body)
+            print(new_message.message_id)
+            print(new_message.is_draft)
+            print(new_message.delivery_date)
+            sender= db.session.query(User).filter(User.id == current_user.id)
+            new_message.sender_id=sender.first().id
+            print(new_message.sender_id)
+            return redirect('/users')
+    elif request.method == 'GET':
+        if current_user is not None and hasattr(current_user, 'id'):
+            q = db.session.query(User).filter(User.id == current_user.id)
+            #print(q.firstname)
+            print(q.first().firstname)
+            return render_template("send.html", current_user=q.first().firstname, form=form)
+        else:
+            welcome = None
+            return render_template("index.html", welcome=welcome)
     
     
