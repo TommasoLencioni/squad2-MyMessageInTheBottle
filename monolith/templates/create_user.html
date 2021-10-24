@@ -14,6 +14,9 @@
      {% endfor %}
     </dl>
     <p>
+      {% if fail_date %}
+        <p style="color:red">Check your birthday date</p>
+      {% endif %}
     <input type=submit value="Submit">
   </form>
  </body>
