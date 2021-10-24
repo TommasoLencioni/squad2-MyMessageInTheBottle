@@ -1,3 +1,8 @@
+from datetime import date, datetime
+from re import I
+from sqlalchemy import select
+import time
+import datetime
 from flask import Blueprint, redirect, render_template, request
 
 from monolith.database import User, db, Message
@@ -44,15 +49,41 @@ def send():
         if form.validate_on_submit():
             new_message = Message()
             form.populate_obj(new_message)
+
+            #the value of the recipient_id
+            receiver_id = db.session.query(User).filter(User.email == request.form["recipient"])
+            new_message.receiver_id = receiver_id.first().id
             print(new_message.receiver_id)
-            print('Text should be here' + new_message.body)
+
+            #new_message.body = request.form['body']
+            print('Text should be here: ' + new_message.body)
+
             print(new_message.message_id)
+
+            #is_draft values 
+            if request.form['submit_button'] == 'Save as draft':
+                new_message.is_draft = True
+            else:
+                new_message.is_draft = False
             print(new_message.is_draft)
+
+            #new_message.delivery_date = request.form['delivery_date']
             print(new_message.delivery_date)
+
             sender= db.session.query(User).filter(User.id == current_user.id)
             new_message.sender_id=sender.first().id
             print(new_message.sender_id)
-            #TODO  finish to populate
+
+            #creation date values
+            new_message.creation_date = datetime.date.today()
+            print(new_message.creation_date)
+
+            print(db.session.execute(select(Message)))
+
+            #db adding
+            db.session.add(new_message)
+            db.session.commit()
+            
             return redirect('/users') #TOFIX This redirect is a stub
     elif request.method == 'GET':
         if current_user is not None and hasattr(current_user, 'id'):

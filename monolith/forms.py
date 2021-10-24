@@ -29,4 +29,6 @@ class SendForm(FlaskForm):
     recipient = f.StringField('Recipient', validators=[DataRequired()])
     body = f.TextAreaField('Message', validators=[DataRequired()])
     delivery_date = f.DateField('Delivery date', format='%d/%m/%Y')
+    send_button = f.SubmitField('send')
+    draft_button = f.SubmitField('save as draft')
     display = ['recipient', 'body', 'delivery_date']
