@@ -1,5 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Send{% endblock %}
+{% block content %}
 <html>
     <body>
+
         <h1>Write a message</h1>
         <h2>{{current_user}}</h2>
         <form action="" method="POST">
@@ -19,5 +23,7 @@
             <input type=submit value="Save as draft " style="height:40px; width:150px">
             <input type=submit value="Send" style="height:40px; width:150px">
         </form>
+
     </body>
 </html>
+{% endblock %}

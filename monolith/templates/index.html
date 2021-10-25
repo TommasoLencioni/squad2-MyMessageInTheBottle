@@ -1,9 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Home Page{% endblock %}
+{% block content %}
 <h1>My Message in a Bottle -- Primer</h1>
-
 {% if current_user.is_authenticated %}
   Hi {{ current_user.firstname }}! <a href="/logout">Logout</a>
     <h2>{{ welcome }}</h2>
     <a href="/send">Send a message</a>
 {% else %}
-  Hi Anonymous, <a href="/login">Log in</a>
+ Hi Anonymous, <a href="/login">Log in</a>
 {% endif %}
+{% endblock %}
