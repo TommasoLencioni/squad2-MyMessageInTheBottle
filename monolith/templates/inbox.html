@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Inbox{% endblock %}
+{% block content %}
+<html>
+  <body>
+
+    <link rel="stylesheet" href="custom.css">
+<h1>Messages</h1>
+{% for message in messages: %}
+<div class="flex-grow-1 ml-3"></div>
+{{message.sender_id}} {{message.body}} {{message.message_id}}
+{% endfor %}
+{% endblock %}
+
+</body>
+</html>
