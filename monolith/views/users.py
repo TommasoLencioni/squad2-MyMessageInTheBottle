@@ -45,6 +45,8 @@ def create_user():
 @users.route('/send', methods=['POST', 'GET'])
 def send():
     form = SendForm()
+    #TODO blacklist
+    user_list = db.session.query(User.email).filter(User.id != current_user.id)
     if request.method == 'POST':
         if form.validate_on_submit():
             new_message = Message()
@@ -85,12 +87,14 @@ def send():
             db.session.commit()
             
             return redirect('/users') #TOFIX This redirect is a stub
+        else:
+            print(form.data)
     elif request.method == 'GET':
         if current_user is not None and hasattr(current_user, 'id'):
             q = db.session.query(User).filter(User.id == current_user.id)
             #print(q.firstname)
-            print(q.first().firstname)
-            return render_template("send.html", current_user=q.first().firstname, form=form)
+            #print(q.first().firstname)
+            return render_template("send.html", current_user=q.first().firstname, form=form, user_list=user_list)
         else:
             welcome = None
             return render_template("index.html", welcome=welcome)
