@@ -21,8 +21,8 @@ class UserForm(FlaskForm):
 
     def validate_on_submit(self):
             result = super(UserForm, self).validate()
-            print(str(self.dateofbirth.data)+"data")
-            if (self.dateofbirth.data is not None and self.dateofbirth.data>date.today()):
+            print(str(self.date_of_birth.data)+"data")
+            if (self.date_of_birth.data is not None and self.date_of_birth.data>date.today()):
                 return False
             else:
                 return result
