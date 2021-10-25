@@ -17,7 +17,7 @@ University of Pisa.
 |Leonardo Talerico |@studenti.unipi.it             |
 |Gabriele Sipione  |@studenti.unipi.it             |
 |Usman Shahzad     |u.shahzad1@studenti.unipi.it   |
-|Filippo           |@studenti.unipi.it             |
+|Filippo           |f.dolente@studenti.unipi.it             |
 
 
 ## Instructions

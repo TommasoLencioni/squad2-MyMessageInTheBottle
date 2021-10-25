@@ -94,5 +94,27 @@ def send():
         else:
             welcome = None
             return render_template("index.html", welcome=welcome)
-    
-    
+
+
+@users.route('/profile', methods=['GET'])
+def profile():
+    """
+        This functionality allows to users to view the user's profile.
+        Retrive the information about the user in the db, and pass as argument
+        the values in the 'profile_info.html' template.
+        If the user who try to access this service is not logged, will be render in the
+        'home' page
+    """
+    return render_template("profile_info.html", current_user=current_user)
+
+
+@users.route('/deleteAccount', methods=['POST','GET'])
+def delete_account():
+    """
+        This funcionality allows user to delete his/her account from MyMessageInTheBottle.
+        The function will delete the account only for the logged user, and will redirect in the start page
+    """
+    if current_user is not None and hasattr(current_user, 'id'):
+        query = db.session.query(User).filter(User.id == current_user.id).delete()
+        db.session.commit()
+    return render_template("delete.html")

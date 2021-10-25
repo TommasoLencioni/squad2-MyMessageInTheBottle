@@ -14,8 +14,10 @@ class UserForm(FlaskForm):
     firstname = f.StringField('firstname', validators=[DataRequired()])
     lastname = f.StringField('lastname', validators=[DataRequired()])
     password = f.PasswordField('password', validators=[DataRequired()])
-    dateofbirth = f.DateField('dateofbirth', format='%d/%m/%Y')
-    display = ['email', 'firstname', 'lastname', 'password', 'dateofbirth']
+    date_of_birth = f.DateField('date_of_birth', format='%d/%m/%Y')
+    nickname = f.StringField('nickname', validators=[DataRequired()])
+    location = f.StringField('location', validators=[DataRequired()])
+    display = ['email', 'firstname', 'lastname', 'password', 'date_of_birth','nickname','location']
 
     def validate_on_submit(self):
             result = super(UserForm, self).validate()
