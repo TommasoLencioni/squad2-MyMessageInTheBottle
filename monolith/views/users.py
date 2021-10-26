@@ -86,12 +86,10 @@ def send():
         new_message.creation_date = datetime.date.today()
         print(new_message.creation_date)
 
-        print(db.session.execute(select(Message)))
-
         #db adding
         db.session.add(new_message)
         db.session.commit()
-        
+        print('ID e ' + str(new_message.message_id))
         return redirect('/users') #TOFIX This redirect to sending_messages
         #else:
         #    print("ERROREEEE validate")
