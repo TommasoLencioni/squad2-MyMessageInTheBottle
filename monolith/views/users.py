@@ -90,7 +90,11 @@ def send():
         db.session.add(new_message)
         db.session.commit()
         print('ID e ' + str(new_message.message_id))
-        return redirect('/users') #TOFIX This redirect to sending_messages
+        q = db.session.query(User).filter(User.id == current_user.id)
+        if new_message.is_draft:
+            return render_template("send.html", current_user=q.first().firstname, form=form, user_list=new_user_list, is_draft=True) #TOFIX This redirect to sending_messages
+        else:
+            return render_template("send.html", current_user=q.first().firstname, form=form, user_list=new_user_list, is_sent=True) #TOFIX This redirect to sending_messages
         #else:
         #    print("ERROREEEE validate")
     elif request.method == 'GET':
