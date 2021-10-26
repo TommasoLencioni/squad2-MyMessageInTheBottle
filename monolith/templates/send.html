@@ -5,6 +5,7 @@
         <form action="" method="POST">
             {{ form.hidden_tag() }}
             <dl>
+            <p>Recipient</p>
             <select name="recipient" onChange="changeSizeInput()" id="recipient">
                 {% for user in user_list %}
                     <option value="{{user}}">{{user}}</option>

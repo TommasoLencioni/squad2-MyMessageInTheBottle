@@ -29,12 +29,13 @@ class UserForm(FlaskForm):
 
 class SendForm(FlaskForm):
     recipient = f.SelectField('Recipient', validators=[DataRequired()])
+    #recipient = f.TextField('Recipient', validators=[DataRequired()])
     body = f.TextAreaField('Message', validators=[DataRequired()])
     delivery_date = f.DateField('Delivery date', format='%d/%m/%Y')
     send_button = f.SubmitField('send')
     draft_button = f.SubmitField('save as draft')
     display = ['body', 'delivery_date']
+    #display = ['recipient', 'body', 'delivery_date']
 
-    #def validate_on_submit(self):
-     #       print("RECIP dovrebbe essere "+ str(self.recipient))
-     #       return super(UserForm, self).validate()
+    #def validate_on_submit_2(self):
+    #      return super(SendForm, self).validate()
