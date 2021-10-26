@@ -125,12 +125,13 @@ def delete_account():
         This funcionality allows user to delete his/her account from MyMessageInTheBottle.
         The function will delete the account only for the logged user, and will redirect in the start page
     """
-    if current_user is not None and hasattr(current_user, 'id'):
-        query = db.session.query(User).filter(User.id == current_user.id).delete()
-        db.session.commit()
-    return render_template("delete.html")
-
-@users.route('/draft/<message_id>', methods=['POST', 'GET'])
-def draft():
-    #TODO get the message id and propose to the user a form already filled with the data already inserted
-    pass
+    if request.method == 'GET':
+        return render_template("delete.html")
+    else:
+        if request.form['confirm_button'] == 'Delete my account':
+            if current_user is not None and hasattr(current_user, 'id'):
+                query = db.session.query(User).filter(User.id == current_user.id).delete()
+                db.session.commit()
+            return render_template('delete.html', is_deleted=True)
+        else:
+            return redirect('/')
