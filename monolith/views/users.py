@@ -123,4 +123,5 @@ def delete_account():
 @users.route('/inbox', methods=['GET'])
 def inbox():
     _messages = db.session.query(Message).filter(Message.receiver_id == current_user.id)
-    return render_template("inbox.html", messages=_messages)
+    _users = db.session.query(User)
+    return render_template("inbox.html", messages=_messages, users=_users)
