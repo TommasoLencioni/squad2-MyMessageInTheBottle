@@ -120,7 +120,7 @@ def delete_account():
         db.session.commit()
     return render_template("delete.html")
 
-@users.route('/inbox', methods=['GET'])
+@users.route('/mailbox', methods=['GET'])
 def inbox():
     _messages = db.session.query(Message).filter(Message.receiver_id == current_user.id)
     _users = db.session.query(User)
