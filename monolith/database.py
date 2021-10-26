@@ -45,7 +45,7 @@ class User(db.Model):
 
 class Message(db.Model):
     __tablename__ = 'message'
-
+    #TODO: add a sender/reciever _nickname or name so we can display it
     message_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     sender_id = db.Column(db.Integer, nullable=False)
     receiver_id = db.Column(db.Integer, nullable=False)
