@@ -122,6 +122,6 @@ def delete_account():
 
 @users.route('/mailbox', methods=['GET'])
 def inbox():
-    _messages = db.session.query(Message).filter(Message.receiver_id == current_user.id)
-    _users = db.session.query(User)
-    return render_template("inbox.html", messages=_messages, users=_users)
+    _recMessages = db.session.query(Message).filter(Message.receiver_id == current_user.id)
+    _sentMessages = db.session.query(Message).filter(Message.sender_id == current_user.id)
+    return render_template("mailbox.html", messages=_recMessages, sendMessages=_sentMessages)
