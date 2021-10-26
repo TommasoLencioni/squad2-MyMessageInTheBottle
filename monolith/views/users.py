@@ -45,57 +45,66 @@ def create_user():
 @users.route('/send', methods=['POST', 'GET'])
 def send():
     form = SendForm()
+    #TODO blacklist
+    user_list = db.session.query(User.email).filter(User.id != current_user.id)
+    #print(user_list.all())
+    new_user_list=[]
+    for elem in user_list.all():
+        new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
+    print(new_user_list)
     if request.method == 'POST':
-        if form.validate_on_submit():
-            new_message = Message()
-            form.populate_obj(new_message)
+        print(form.data)
+        #if form.validate_on_submit_2():
+        new_message = Message()
+        form.populate_obj(new_message)
 
-            #the value of the recipient_id
-            receiver_id = db.session.query(User).filter(User.email == request.form["recipient"])
-            new_message.receiver_id = receiver_id.first().id
-            print(new_message.receiver_id)
+        #the value of the recipient_id
+        receiver_id = db.session.query(User).filter(User.email == request.form["recipient"])
+        new_message.receiver_id = receiver_id.first().id
+        print(new_message.receiver_id)
 
-            #new_message.body = request.form['body']
-            print('Text should be here: ' + new_message.body)
+        #new_message.body = request.form['body']
+        print('Text should be here: ' + new_message.body)
 
-            print(new_message.message_id)
+        print(new_message.message_id)
 
-            #is_draft values 
-            if request.form['submit_button'] == 'Save as draft':
-                new_message.is_draft = True
-            else:
-                new_message.is_draft = False
-            print(new_message.is_draft)
+        #is_draft values 
+        if request.form['submit_button'] == 'Save as draft':
+            new_message.is_draft = True
+        else:
+            new_message.is_draft = False
+        print(new_message.is_draft)
 
-            #new_message.delivery_date = request.form['delivery_date']
-            print(new_message.delivery_date)
+        #new_message.delivery_date = request.form['delivery_date']
+        print(new_message.delivery_date)
 
-            sender= db.session.query(User).filter(User.id == current_user.id)
-            new_message.sender_id=sender.first().id
-            print(new_message.sender_id)
+        sender= db.session.query(User).filter(User.id == current_user.id)
+        new_message.sender_id=sender.first().id
+        print(new_message.sender_id)
 
-            #creation date values
-            new_message.creation_date = datetime.date.today()
-            print(new_message.creation_date)
+        #creation date values
+        new_message.creation_date = datetime.date.today()
+        print(new_message.creation_date)
 
-            print(db.session.execute(select(Message)))
+        print(db.session.execute(select(Message)))
 
-            #db adding
-            db.session.add(new_message)
-            db.session.commit()
-            
-            return redirect('/users') #TOFIX This redirect is a stub
+        #db adding
+        db.session.add(new_message)
+        db.session.commit()
+        
+        return redirect('/users') #TOFIX This redirect to sending_messages
+        #else:
+        #    print("ERROREEEE validate")
     elif request.method == 'GET':
         if current_user is not None and hasattr(current_user, 'id'):
             q = db.session.query(User).filter(User.id == current_user.id)
             #print(q.firstname)
-            print(q.first().firstname)
-            return render_template("send.html", current_user=q.first().firstname, form=form)
+            #print(q.first().firstname)
+            return render_template("send.html", current_user=q.first().firstname, form=form, user_list=new_user_list)
         else:
             welcome = None
             return render_template("index.html", welcome=welcome)
-
-
+  
 @users.route('/profile', methods=['GET'])
 def profile():
     """
@@ -118,3 +127,8 @@ def delete_account():
         query = db.session.query(User).filter(User.id == current_user.id).delete()
         db.session.commit()
     return render_template("delete.html")
+
+@users.route('/draft/<message_id>', methods=['POST', 'GET'])
+def draft():
+    #TODO get the message id and propose to the user a form already filled with the data already inserted
+    pass
