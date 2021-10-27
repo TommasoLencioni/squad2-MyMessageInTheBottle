@@ -3,10 +3,11 @@
 {% block content %}
 <h1>My Message in a Bottle -- Primer</h1>
 {% if current_user.is_authenticated %}
-  Hi {{ current_user.firstname }}! <a href="/logout">Logout</a>
-    <h2>{{ welcome }}</h2>
-    <a href="/send">Send a message</a>
+  Hi {{ current_user.firstname }}!
+  <a href="/profile">Profile</a>
+  <a href="/logout">Logout</a>
+  <a href="/send">Send a message</a>
 {% else %}
- Hi Anonymous, <a href="/login">Log in</a>
+Hi Anonymous, <a href="/login">log in</a> or <a href="/create_user">create an account</a>
 {% endif %}
 {% endblock %}
