@@ -145,6 +145,17 @@ def delete_account():
 
 @users.route('/mailbox', methods=['GET'])
 def inbox():
-    _recMessages = db.session.query(Message).filter(Message.receiver_id == current_user.id)
-    _sentMessages = db.session.query(Message).filter(Message.sender_id == current_user.id)
-    return render_template("mailbox.html", messages=_recMessages, sendMessages=_sentMessages)
+    _recMessages = db.session.query(Message).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False)
+    _sentMessages = db.session.query(Message).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False)
+    message_and_users = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id)
+    print(message_and_users)
+    nickname_list=[]
+    for elem in message_and_users.all():
+        print(str(elem[1].nickname))
+        #nickname_list.append
+    #user_list = db.session.query(User.email).filter(User.id != current_user.id)
+    #print(user_list.all())
+    #new_user_list=[]
+    #for elem in user_list.all():
+    #    new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
+    return render_template("mailbox.html", messages=_recMessages, sendMessages=_sentMessages, message_and_users=message_and_users.all())
