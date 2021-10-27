@@ -12,13 +12,13 @@ class LoginForm(FlaskForm):
 
 
 class UserForm(FlaskForm):
-    email = f.StringField('email', validators=[DataRequired()])
-    firstname = f.StringField('firstname', validators=[DataRequired()])
-    lastname = f.StringField('lastname', validators=[DataRequired()])
-    password = f.PasswordField('password', validators=[DataRequired()])
-    date_of_birth = f.DateField('date_of_birth', format='%d/%m/%Y')
-    nickname = f.StringField('nickname', validators=[DataRequired()])
-    location = f.StringField('location', validators=[DataRequired()])
+    email = f.StringField('e-mail', validators=[DataRequired()])
+    firstname = f.StringField('Firstname', validators=[DataRequired()])
+    lastname = f.StringField('Lastname', validators=[DataRequired()])
+    password = f.PasswordField('Password', validators=[DataRequired()])
+    date_of_birth = f.DateField('Date of birth', format='%d/%m/%Y')
+    nickname = f.StringField('Nickname', validators=[DataRequired()])
+    location = f.StringField('Location', validators=[DataRequired()])
     display = ['email', 'firstname', 'lastname', 'password', 'date_of_birth','nickname','location']
 
     def validate_on_submit(self):
