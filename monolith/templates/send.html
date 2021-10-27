@@ -1,51 +1,55 @@
 <html>
     <body>
-        <h1>Write a message</h1>
-        <h2>{{current_user}}</h2>
-        <form action="" method="POST">
-            {{ form.hidden_tag() }}
-            <dl>
-            <p>Recipient</p>
-            <select name="recipient" onChange="changeSizeInput()" id="recipient">
-                {% for user in user_list %}
-                    <option value="{{user}}">{{user}}</option>
+        {% if current_user.is_authenticated %}
+            <h1>Write a message</h1>
+            <h2>{{current_user_firstname}}</h2>
+            <form action="" method="POST">
+                {{ form.hidden_tag() }}
+                <dl>
+                <p>Recipient</p>
+                <select name="recipient" onChange="changeSizeInput()" id="recipient">
+                    {% for user in user_list %}
+                        <option value="{{user}}">{{user}}</option>
+                    {% endfor %}
+                </select>
+                {% for field in form.display %}
+                <dt>{{ form[field].label }}</dt>
+                <dd>{{ form[field]() }}</dd>
+                {% if form[field].errors %}
+                    {% for e in form[field].errors %}
+                    <p class="help-block">{{ e }}</p>
+                    {% endfor %}
+                {% endif %}
                 {% endfor %}
-            </select>
-            {% for field in form.display %}
-            <dt>{{ form[field].label }}</dt>
-            <dd>{{ form[field]() }}</dd>
-            {% if form[field].errors %}
-                {% for e in form[field].errors %}
-                <p class="help-block">{{ e }}</p>
-                {% endfor %}
+                </dl>
+                <p>
+                <input type=submit name="submit_button" value="Save as draft" style="height:40px; width:150px">
+                <input type=submit name="submit_button" value="Send" style="height:40px; width:150px">
+            </form>
+            {% if is_sent %}
+            <h1>The message has been successfully sent!</h1>
+            <script>    
+                window.setTimeout(function(){
+        
+                // TODO move to sent messages
+                window.location.href = "/";
+        
+                }, 2500);
+            </script>
             {% endif %}
-            {% endfor %}
-            </dl>
-            <p>
-            <input type=submit name="submit_button" value="Save as draft" style="height:40px; width:150px">
-            <input type=submit name="submit_button" value="Send" style="height:40px; width:150px">
-        </form>
-        {% if is_sent %}
-        <h1>The message has been successfully sent!</h1>
-        <script>    
-            window.setTimeout(function(){
-       
-              // TODO move to sent messages
-              window.location.href = "/";
-       
-              }, 2500);
-        </script>
-        {% endif %}
-        {% if is_draft %}
-        <h1>The message has been successfully saved as a darft!</h1>
-        <script>    
-            window.setTimeout(function(){
-       
-              // TODO move to drafts
-              window.location.href = "/";
-       
-              }, 2500);
-        </script>
+            {% if is_draft %}
+            <h1>The message has been successfully saved as a darft!</h1>
+            <script>    
+                window.setTimeout(function(){
+        
+                // TODO move to drafts
+                window.location.href = "/";
+        
+                }, 2500);
+            </script>
+            {% endif %}
+        {% else %}
+            Hi Anonymous, <a href="/login">Log in</a>
         {% endif %}
     </body>
 </html>

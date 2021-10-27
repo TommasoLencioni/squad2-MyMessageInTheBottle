@@ -1,7 +1,6 @@
 <h1>My Message in a Bottle -- Profile</h1>
 
 {% if current_user.is_authenticated %}
-  Hi {{ current_user.firstname }}! <a href="/logout">Logout</a>
     <p><h3> firstname : </h3> {{ current_user.firstname }}</p>
     <h3> surname : </h3>  {{ current_user.lastname }}
     <h3> email : </h3> {{ current_user.email }}
@@ -11,6 +10,7 @@
     <br><br>
     <br><br>
     <a href="/send">Send a message</a>
+    <a href="/logout">Logout</a>
     <a href="/deleteAccount">Delete your account</a>
 {% else %}
   Hi Anonymous, <a href="/login">Log in</a>

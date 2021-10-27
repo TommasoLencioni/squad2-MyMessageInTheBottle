@@ -45,13 +45,6 @@ def create_user():
 @users.route('/send', methods=['POST', 'GET'])
 def send():
     form = SendForm()
-    #TODO blacklist
-    user_list = db.session.query(User.email).filter(User.id != current_user.id)
-    #print(user_list.all())
-    new_user_list=[]
-    for elem in user_list.all():
-        new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
-    print(new_user_list)
     if request.method == 'POST':
         print(form.data)
         #if form.validate_on_submit_2():
@@ -91,18 +84,31 @@ def send():
         db.session.commit()
         print('ID e ' + str(new_message.message_id))
         q = db.session.query(User).filter(User.id == current_user.id)
+        #TODO blacklist
+        user_list = db.session.query(User.email).filter(User.id != current_user.id)
+        #print(user_list.all())
+        new_user_list=[]
+        for elem in user_list.all():
+            new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
         if new_message.is_draft:
-            return render_template("send.html", current_user=q.first().firstname, form=form, user_list=new_user_list, is_draft=True) #TOFIX This redirect to sending_messages
+            return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list, is_draft=True) #TOFIX This redirect to sending_messages
         else:
-            return render_template("send.html", current_user=q.first().firstname, form=form, user_list=new_user_list, is_sent=True) #TOFIX This redirect to sending_messages
+            return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list, is_sent=True) #TOFIX This redirect to sending_messages
         #else:
         #    print("ERROREEEE validate")
     elif request.method == 'GET':
         if current_user is not None and hasattr(current_user, 'id'):
+            #TODO blacklist
+            user_list = db.session.query(User.email).filter(User.id != current_user.id)
+            #print(user_list.all())
+            new_user_list=[]
+            for elem in user_list.all():
+                new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
+            print(new_user_list)
             q = db.session.query(User).filter(User.id == current_user.id)
             #print(q.firstname)
             #print(q.first().firstname)
-            return render_template("send.html", current_user=q.first().firstname, form=form, user_list=new_user_list)
+            return render_template("send.html", current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list)
         else:
             welcome = None
             return render_template("index.html", welcome=welcome)
