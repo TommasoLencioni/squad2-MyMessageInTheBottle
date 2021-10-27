@@ -19,6 +19,7 @@ class User(db.Model):
     propic = db.Column(db.Unicode(128))
     is_active = db.Column(db.Boolean, default=False)
     is_admin = db.Column(db.Boolean, default=False)
+    is_deleted = db.Column(db.Boolean, default=False)
     is_anonymous = False
    # blacklist = db.Column(db.Enum(db.Integer)) #This enum contains the id of the users that this user blacklisted
     #we need to define a class Enum.

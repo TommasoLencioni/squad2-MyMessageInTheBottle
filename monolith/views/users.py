@@ -15,7 +15,7 @@ users = Blueprint('users', __name__)
 
 @users.route('/users')
 def _users():
-    _users = db.session.query(User)
+    _users = db.session.query(User).filter(User.is_deleted==False)
     return render_template("users.html", users=_users)
 
 
@@ -137,7 +137,8 @@ def delete_account():
     else:
         if request.form['confirm_button'] == 'Delete my account':
             if current_user is not None and hasattr(current_user, 'id'):
-                query = db.session.query(User).filter(User.id == current_user.id).delete()
+                query = db.session.query(User).filter(User.id == current_user.id)
+                query.first().is_deleted=True
                 db.session.commit()
             return render_template('delete.html', is_deleted=True)
         else:

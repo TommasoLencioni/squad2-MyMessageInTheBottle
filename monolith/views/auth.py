@@ -13,7 +13,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         email, password = form.data['email'], form.data['password']
-        q = db.session.query(User).filter(User.email == email)
+        q = db.session.query(User).filter(User.email == email).filter(User.is_deleted==False)
         user = q.first()
         if user is not None and user.authenticate(password):
             user.is_active=True
