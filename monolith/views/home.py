@@ -11,4 +11,4 @@ def index():
         welcome = "Logged In!"
     else:
         welcome = None
-    return render_template("index.html", welcome=welcome)
+    return render_template("mailbox.html", welcome=welcome)

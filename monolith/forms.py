@@ -6,8 +6,8 @@ from datetime import date
 from monolith.database import User, db, Message
 
 class LoginForm(FlaskForm):
-    email = f.StringField('email', validators=[DataRequired()])
-    password = f.PasswordField('password', validators=[DataRequired()])
+    email = f.StringField('email', validators=[DataRequired()], render_kw={"placeholder": "email"})
+    password = f.PasswordField('password', validators=[DataRequired()], render_kw={"placeholder": "password"})
     display = ['email', 'password']
 
 
