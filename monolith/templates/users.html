@@ -1,14 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+
 <html>
   <body>
-    <h1>User List</h1>
-    <ul>
-      {% for user in users: %}
-      <li>
-      {{user.firstname}} {{user.lastname}}
-      </li>
-      {% endfor %}
-    </ul>
+
+    <link rel="stylesheet" href="custom.css">
+
+    <!-- <main class="content"> -->
+      <div class="container">
+  
+          <h1 class="h3 mb-3 mt-3">Users List</h1>
+  
+          <!-- <div class="card"> -->
+              <!-- <div class="row g-0"> -->
+                  <!-- <div class="col-12 col-lg-5 col-xl-3 align-items-center"> -->
+  
+                      <div class="px-4 d-none d-md-block">
+                          <div class="d-flex align-items-center">
+                              <div class="flex-grow-1">
+                                  <input type="text" class="form-control my-3" placeholder="Search...">
+                              </div>
+                          </div>
+                      </div>
+  
+                      {% for user in users: %}
+                      <a href="/" class="list-group-item list-group-item-action border-0">
+                          <div class="d-flex align-items-start">
+                              <img src="https://bootdey.com/img/Content/avatar/avatar4.png" class="rounded-circle mr-1" alt="Vanessa Tucker" width="40" height="40">
+                              <div class="flex-grow-1 ml-3">
+                                {{user.firstname}} {{user.lastname}}
+                                {% if user.is_active: %}
+                                  <div class="small"><span class="fas fa-circle chat-online"> Online</span></div>
+                                {% else: %}
+                                  <div class="small"><span class="fas fa-circle chat-online"> Offline</span></div>
+                                {% endif %}
+                                </div>
+                          </div>
+                      </a>
+                      {% endfor %}
+                     
+
+  
+                  <!-- </div> -->
+              <!-- </div> -->
+          <!-- </div> -->
+      </div>
+  <!-- </main> -->
+
+
   </body>
   <br>
   <a href="/">Home</a>
 </html>
+{% endblock %}

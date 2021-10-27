@@ -17,7 +17,7 @@ class User(db.Model):
     location = db.Column(db.Unicode(128))
     nickname = db.Column(db.Unicode(128))
     propic = db.Column(db.Unicode(128))
-    is_active = db.Column(db.Boolean, default=True)
+    is_active = db.Column(db.Boolean, default=False)
     is_admin = db.Column(db.Boolean, default=False)
     is_anonymous = False
    # blacklist = db.Column(db.Enum(db.Integer)) #This enum contains the id of the users that this user blacklisted
@@ -45,7 +45,7 @@ class User(db.Model):
 
 class Message(db.Model):
     __tablename__ = 'message'
-
+    #TODO: add a sender/reciever _nickname or name so we can display it
     message_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     sender_id = db.Column(db.Integer, nullable=False)
     receiver_id = db.Column(db.Integer, nullable=False)

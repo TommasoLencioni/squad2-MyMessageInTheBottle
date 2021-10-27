@@ -1,3 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Send{% endblock %}
+{% block content %}
 <html>
     <body>
         {% if current_user.is_authenticated %}
@@ -13,13 +16,13 @@
                     {% endfor %}
                 </select>
                 {% for field in form.display %}
-                <dt>{{ form[field].label }}</dt>
-                <dd>{{ form[field]() }}</dd>
-                {% if form[field].errors %}
-                    {% for e in form[field].errors %}
-                    <p class="help-block">{{ e }}</p>
-                    {% endfor %}
-                {% endif %}
+                  <dt>{{ form[field].label }}</dt>
+                  <dd>{{ form[field]() }}</dd>
+                  {% if form[field].errors %}
+                      {% for e in form[field].errors %}
+                      <p class="help-block">{{ e }}</p>
+                      {% endfor %}
+                  {% endif %}
                 {% endfor %}
                 </dl>
                 <p>
@@ -53,3 +56,4 @@
         {% endif %}
     </body>
 </html>
+{% endblock %}

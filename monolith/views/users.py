@@ -4,6 +4,7 @@ from sqlalchemy import select
 import time
 import datetime
 from flask import Blueprint, redirect, render_template, request
+from flask_login import current_user
 
 from monolith.database import User, db, Message
 from monolith.forms import UserForm, SendForm
@@ -141,3 +142,9 @@ def delete_account():
             return render_template('delete.html', is_deleted=True)
         else:
             return redirect('/')
+
+@users.route('/mailbox', methods=['GET'])
+def inbox():
+    _recMessages = db.session.query(Message).filter(Message.receiver_id == current_user.id)
+    _sentMessages = db.session.query(Message).filter(Message.sender_id == current_user.id)
+    return render_template("mailbox.html", messages=_recMessages, sendMessages=_sentMessages)
