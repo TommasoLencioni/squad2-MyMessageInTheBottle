@@ -1,7 +1,6 @@
 <html>
 <head>
 	<title>Login Page</title>
-   <!--Made with love by Mutiullah Samim -->
    
 	<!--Bootsrap 4 CDN-->
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
@@ -106,13 +105,13 @@ margin-left: 4px;
               {% for field in form.display %}
               <div class="input-group form-group">
                 <div class="input-group-prepend">
-                  <span class="input-group-text"><i class="fas fa-user" id="fasChange"></i></span>
+                  <span class="input-group-text"><i class="fas fa-key" id="fasChange"></i></span>
                   <dd style="margin-left: 30px; margin-top: 6px;">{{ form[field]() }}</dd>
                 </div>
               </div>
 
               <script>
-                document.getElementById("fasChange").className= "fas fa-key";
+                document.getElementById("fasChange").className= "fas fa-user";
               </script>
 
                 {% if form[field].errors %}
@@ -122,9 +121,9 @@ margin-left: 4px;
                 {% endif %}
               {% endfor %}
 
-              <div class="row align-items-center remember">
+              <!-- <div class="row align-items-center remember">
                 <input type="checkbox">Remember Me
-              </div>
+              </div> -->
               <div class="form-group">
                 <input type="submit" value="Publish" class="btn float-right login_btn">
               </div>
@@ -135,9 +134,9 @@ margin-left: 4px;
             <div class="d-flex justify-content-center links">
               Don't have an account?<a href="/create_user">Sign Up</a>
             </div>
-            <div class="d-flex justify-content-center">
+            <!-- <div class="d-flex justify-content-center">
               <a href="#">Forgot your password?</a>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>

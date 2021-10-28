@@ -12,13 +12,13 @@ class LoginForm(FlaskForm):
 
 
 class UserForm(FlaskForm):
-    email = f.StringField('e-mail', validators=[DataRequired()])
-    firstname = f.StringField('Firstname', validators=[DataRequired()])
-    lastname = f.StringField('Lastname', validators=[DataRequired()])
-    password = f.PasswordField('Password', validators=[DataRequired()])
-    date_of_birth = f.DateField('Date of birth', format='%d/%m/%Y')
-    nickname = f.StringField('Nickname', validators=[DataRequired()])
-    location = f.StringField('Location', validators=[DataRequired()])
+    email = f.StringField('e-mail', validators=[DataRequired()], render_kw={"placeholder": "email"})
+    firstname = f.StringField('Firstname', validators=[DataRequired()], render_kw={"placeholder": "Firstname"})
+    lastname = f.StringField('Lastname', validators=[DataRequired()], render_kw={"placeholder": "Lastname"})
+    password = f.PasswordField('Password', validators=[DataRequired()], render_kw={"placeholder": "Password"})
+    date_of_birth = f.DateField('Date of birth', format='%d/%m/%Y', render_kw={"placeholder": "DD/MM/YYYY"})
+    nickname = f.StringField('Nickname', validators=[DataRequired()], render_kw={"placeholder": "Nickname"})
+    location = f.StringField('Location', validators=[DataRequired()], render_kw={"placeholder": "Location"})
     display = ['email', 'firstname', 'lastname', 'password', 'date_of_birth','nickname','location']
 
     def validate_on_submit(self):
