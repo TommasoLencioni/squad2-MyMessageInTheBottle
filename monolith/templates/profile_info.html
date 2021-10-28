@@ -1,20 +1,13 @@
-<h1>My Message in a Bottle -- Profile</h1>
-
-{% if current_user.is_authenticated %}
-    <p><h3> firstname : </h3> {{ current_user.firstname }}</p>
-    <h3> surname : </h3>  {{ current_user.lastname }}
-    <h3> email : </h3> {{ current_user.email }}
-    <h3> birthday : </h3> {{ current_user.date_of_birth }}
-    <h3> location : </h3> {{ current_user.location }}
-    <h3> nickname : </h3> {{ current_user.nickname }}
-    <br><br>
-    <br><br>
-    <a href="/send">Send a message</a>
-    <a href="/logout">Logout</a>
-    <a href="/deleteAccount">Delete your account</a>
-{% else %}
-  Hi Anonymous, <a href="/login">Log in</a>
-{% endif %}
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+      <p><h3> firstname : </h3> {{ current_user.firstname }}</p>
+      <h3> surname : </h3>  {{ current_user.lastname }}
+      <h3> email : </h3> {{ current_user.email }}
+      <h3> birthday : </h3> {{ current_user.date_of_birth }}
+      <h3> location : </h3> {{ current_user.location }}
+      <h3> nickname : </h3> {{ current_user.nickname }}
+{% endblock %}
 
 
 
