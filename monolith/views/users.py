@@ -53,7 +53,7 @@ def send():
         form.populate_obj(new_message)
 
         #the value of the recipient_id
-        receiver_id = db.session.query(User).filter(User.email == request.form["recipient"])
+        receiver_id = db.session.query(User).filter(User.nickname == request.form["recipient"])
         new_message.receiver_id = receiver_id.first().id
         print(new_message.receiver_id)
 
@@ -86,7 +86,7 @@ def send():
         print('ID e ' + str(new_message.message_id))
         q = db.session.query(User).filter(User.id == current_user.id)
         #TODO blacklist
-        user_list = db.session.query(User.email).filter(User.id != current_user.id)
+        user_list = db.session.query(User.nickname).filter(User.id != current_user.id)
         #print(user_list.all())
         new_user_list=[]
         for elem in user_list.all():
@@ -100,7 +100,7 @@ def send():
     elif request.method == 'GET':
         if current_user is not None and hasattr(current_user, 'id'):
             #TODO blacklist
-            user_list = db.session.query(User.email).filter(User.id != current_user.id)
+            user_list = db.session.query(User.nickname).filter(User.id != current_user.id)
             #print(user_list.all())
             new_user_list=[]
             for elem in user_list.all():

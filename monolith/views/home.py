@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect
 
 from monolith.auth import current_user
 
@@ -11,4 +11,4 @@ def index():
         welcome = "Logged In!"
     else:
         welcome = None
-    return render_template("mailbox.html", welcome=welcome)
+    return redirect("/mailbox")
