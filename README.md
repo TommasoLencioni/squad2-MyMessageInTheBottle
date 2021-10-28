@@ -14,7 +14,7 @@ University of Pisa.
 |Name and Surname  | Email                         |
 |------------------|-------------------------------|
 |Tommaso Lencioni  |@studenti.unipi.it             |
-|Leonardo Talerico |@studenti.unipi.it             |
+|Leonardo Talerico |l.talerico@studenti.unipi.it             |
 |Gabriele Sipione  |@studenti.unipi.it             |
 |Usman Shahzad     |u.shahzad1@studenti.unipi.it   |
 |Filippo           |f.dolente@studenti.unipi.it             |
