@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from re import I
+import re
 from sqlalchemy import select
 import time
 import datetime
@@ -15,33 +16,37 @@ users = Blueprint('users', __name__)
 
 @users.route('/users')
 def _users():
-    _users = db.session.query(User).filter(User.is_deleted==False)
-    return render_template("users.html", users=_users)
-
+    if current_user is not None and hasattr(current_user, 'id'):
+        _users = db.session.query(User).filter(User.is_deleted==False)
+        return render_template("users.html", users=_users)
+    else:
+        return redirect('/login')
 
 @users.route('/create_user', methods=['POST', 'GET'])
 def create_user():
     form = UserForm()
-
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            new_user = User()
-            form.populate_obj(new_user)
-            """
-            Password should be hashed with some salt. For example if you choose a hash function x, 
-            where x is in [md5, sha1, bcrypt], the hashed_password should be = x(password + s) where
-            s is a secret key.
-            """
-            new_user.set_password(form.password.data)
-            db.session.add(new_user)
-            db.session.commit()
-            return redirect('/users')
+    if not (current_user is not None and hasattr(current_user, 'id')):
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                new_user = User()
+                form.populate_obj(new_user)
+                """
+                Password should be hashed with some salt. For example if you choose a hash function x, 
+                where x is in [md5, sha1, bcrypt], the hashed_password should be = x(password + s) where
+                s is a secret key.
+                """
+                new_user.set_password(form.password.data)
+                db.session.add(new_user)
+                db.session.commit()
+                return redirect('/users')
+            else:
+                return render_template('create_user.html', form=form, fail_date=True)
+        elif request.method == 'GET':
+            return render_template('create_user.html', form=form)
         else:
-            return render_template('create_user.html', form=form, fail_date=True)
-    elif request.method == 'GET':
-        return render_template('create_user.html', form=form)
+            raise RuntimeError('This should not happen!')
     else:
-        raise RuntimeError('This should not happen!')
+        return "You are currently logged in, you have to <a href=/logout>logout</a> first"  
 
 @users.route('/send', methods=['POST', 'GET'])
 def send():
@@ -112,7 +117,7 @@ def send():
             return render_template("send.html", current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list)
         else:
             welcome = None
-            return render_template("index.html", welcome=welcome)
+            return redirect('/login')
   
 @users.route('/profile', methods=['GET'])
 def profile():
@@ -123,7 +128,10 @@ def profile():
         If the user who try to access this service is not logged, will be render in the
         'home' page
     """
-    return render_template("profile_info.html", current_user=current_user)
+    if current_user is not None and hasattr(current_user, 'id'):
+        return render_template("profile_info.html", current_user=current_user)
+    else:
+        return redirect('/login')
 
 
 @users.route('/deleteAccount', methods=['POST','GET'])
@@ -133,7 +141,10 @@ def delete_account():
         The function will delete the account only for the logged user, and will redirect in the start page
     """
     if request.method == 'GET':
-        return render_template("delete.html")
+        if current_user is not None and hasattr(current_user, 'id'):
+            return render_template("delete.html")
+        else:
+            return redirect('/login')
     else:
         if request.form['confirm_button'] == 'Delete my account':
             if current_user is not None and hasattr(current_user, 'id'):
@@ -146,17 +157,20 @@ def delete_account():
 
 @users.route('/mailbox', methods=['GET'])
 def inbox():
-    _recMessages = db.session.query(Message).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False)
-    _sentMessages = db.session.query(Message).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False)
-    message_and_users = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id)
-    print(message_and_users)
-    nickname_list=[]
-    for elem in message_and_users.all():
-        print(str(elem[1].nickname))
-        #nickname_list.append
-    #user_list = db.session.query(User.email).filter(User.id != current_user.id)
-    #print(user_list.all())
-    #new_user_list=[]
-    #for elem in user_list.all():
-    #    new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
-    return render_template("mailbox.html", messages=_recMessages, sendMessages=_sentMessages, message_and_users=message_and_users.all())
+    if current_user is not None and hasattr(current_user, 'id'):
+        _recMessages = db.session.query(Message).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False)
+        _sentMessages = db.session.query(Message).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False)
+        message_and_users = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id)
+        print(message_and_users)
+        nickname_list=[]
+        for elem in message_and_users.all():
+            print(str(elem[1].nickname))
+            #nickname_list.append
+        #user_list = db.session.query(User.email).filter(User.id != current_user.id)
+        #print(user_list.all())
+        #new_user_list=[]
+        #for elem in user_list.all():
+        #    new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
+        return render_template("mailbox.html", messages=_recMessages, sendMessages=_sentMessages, message_and_users=message_and_users.all())
+    else:
+        return redirect('/login')

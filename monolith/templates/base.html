@@ -5,8 +5,7 @@
 
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         
-        
-        <link rel="stylesheet" href="custom.css">
+      
         <title>{% block title %}{% endblock %}</title>
     </head>
     <body>
@@ -22,19 +21,16 @@
                   <a class="nav-link" href="/send">Send Message<span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
+                  <a class="nav-link" href="/drafts">Drafts</a>
+              </li>
+                <li class="nav-item">
                   <a class="nav-link" href="/users">Users</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="/create_user">Create User</a>
+                  <a class="nav-link" href="/profile">Profile</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Draft</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/inbox">Inbox</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link disabled" href="/logout">Logout</a>
+                  <a class="nav-link" href="/logout">Logout</a>
                 </li>
               </ul>
               <form class="form-inline my-2 my-lg-0">
