@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Inbox{% endblock %}
 {% block content %}
+
+<h1>My Message in a Bottle -- Primer</h1>
+{% if current_user.is_authenticated %}
+  Hi {{ current_user.firstname }}! This is your mailbox!
+
 <!-- Improve the layout accoring with the draft -->
 <html>
     <head>
@@ -135,6 +140,9 @@
 </div>
 
     </div>
+    {% else %}
+Hi Anonymous, <a href="/login">log in</a> or <a href="/create_user">create an account</a>
+{% endif %}
     </body>
 </html>
 {% endblock %}
