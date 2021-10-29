@@ -164,4 +164,3 @@ def inbox():
         return render_template("mailbox.html", messages=_recMessages.all(), sendMessages=_sentMessages.all(), drafMessages=-_draftMessage.all())
     else:
         return redirect('/login')
-
