@@ -48,7 +48,7 @@
         <div class="row">
           <div style="width: 16%; float: left; padding: 10px;">
             <h2 class="h3 mt-3 mb-3">Sender</h2>
-            {% for message in message_and_users: %}
+            {% for message in messages: %}
                 <a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
                     <div class="d-flex align-items-start">
                         <div class="flex-grow-1 ml-3">
@@ -65,7 +65,7 @@
                 <a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
                     <div class="d-flex align-items-start">
                         <div class="flex-grow-1 ml-3">
-                            {{message.delivery_date}}
+                            {{message[0].delivery_date}}
                             </div>
                     </div>
                 </a>
@@ -78,7 +78,7 @@
                 <a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
                     <div class="d-flex align-items-start">
                         <div class="flex-grow-1 ml-3">
-                            {{message.body}}
+                            {{message[0].body}}
                             </div>
                     </div>
                 </a>
@@ -100,12 +100,12 @@
 
 <div class="row">
   <div style="width: 16%; float: left; padding: 10px;">
-    <h2 class="h3 mt-3 mb-3">Sender ID</h2>
+    <h2 class="h3 mt-3 mb-3">Reciever</h2>
     {% for message in sendMessages: %}
         <a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
             <div class="d-flex align-items-start">
                 <div class="flex-grow-1 ml-3">
-                    {{message.sender_id}}
+                    {{message[1].nickname}}
                     </div>
             </div>
         </a>
@@ -113,12 +113,12 @@
   </div>
 
   <div style="width: 17%; float: left; padding: 10px;">
-    <h2 class="h3 mt-3 mb-3">Message ID</h2>
+    <h2 class="h3 mt-3 mb-3">Delivery date</h2>
     {% for message in sendMessages: %}
         <a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
             <div class="d-flex align-items-start">
                 <div class="flex-grow-1 ml-3">
-                    {{message.message_id}}
+                    {{message[0].delivery_date}}
                     </div>
             </div>
         </a>
@@ -131,7 +131,7 @@
         <a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
             <div class="d-flex align-items-start">
                 <div class="flex-grow-1 ml-3">
-                    {{message.body}}
+                    {{message[0].body}}
                     </div>
             </div>
         </a>
@@ -139,6 +139,57 @@
   </div>
 </div>
 
+<div class="container p-0">
+    <h1 class="h3 mt-3 mb-3">Drafts</h1>
+
+<div class="px-4 d-none d-md-block">
+    <div class="d-flex align-items-center">
+        <div class="flex-grow-1">
+            <input type="text" class="form-control my-3" placeholder="Search...">
+        </div>
+    </div>
+</div>
+
+<div class="row">
+<div style="width: 16%; float: left; padding: 10px;">
+<h2 class="h3 mt-3 mb-3">Reciever</h2>
+{% for message in draftMessages: %}
+<a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
+    <div class="d-flex align-items-start">
+        <div class="flex-grow-1 ml-3">
+            {{message[1].nickname}}
+            </div>
+    </div>
+</a>
+{% endfor %}
+</div>
+<div style="width: 67%; float: left; padding: 10px;">
+<h2 class="h3 mt-3 mb-3">Body</h2>
+{% for message in draftMessages: %}
+<a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
+    <div class="d-flex align-items-start">
+        <div class="flex-grow-1 ml-3">
+            {{message[0].body}}
+            
+            </div>
+    </div>
+</a>
+{% endfor %}
+</div>
+
+<div style="width: 17%; float: left; padding: 10px;"> 
+<h2 class="h3 mt-3 mb-3">Delivery date</h2>
+{% for message in draftMessages: %}
+    <div class="d-flex align-items-start">
+        <div class="flex-grow-1 ml-3">
+            <input type="button" value="Click Me" style="float: right;">
+            </div>
+    </div>
+{% endfor %}
+</div>
+
+
+</div>
     </div>
     {% else %}
 Hi Anonymous, <a href="/login">log in</a> or <a href="/create_user">create an account</a>
