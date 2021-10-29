@@ -50,7 +50,13 @@ def create_user():
 
 @users.route('/send', methods=['POST', 'GET'])
 def send():
+    m = request.args.get("reciever")
+    n = request.args.get("body")
     form = SendForm()
+    if ((m is not None) and (n is not None)):
+        form.recipient.data=m
+        form.body.data=n
+
     if request.method == 'POST':
         print(form.data)
         #if form.validate_on_submit_2():
@@ -160,7 +166,7 @@ def inbox():
     if current_user is not None and hasattr(current_user, 'id'):
         _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id)
         _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
-        _draftMessage = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == True).filter(Message.receiver_id==User.id)
-        return render_template("mailbox.html", messages=_recMessages.all(), sendMessages=_sentMessages.all(), drafMessages=-_draftMessage.all())
+        _draftMessage = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == True).filter(Message.receiver_id==User.id)
+        return render_template("mailbox.html", messages=_recMessages.all(), sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
     else:
         return redirect('/login')

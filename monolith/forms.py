@@ -37,7 +37,7 @@ class SendForm(FlaskForm):
     send_button = f.SubmitField('send')
     draft_button = f.SubmitField('save as draft')
     display = ['body', 'delivery_date']
-    #display = ['recipient', 'body', 'delivery_date']
+    #display = ['body', 'delivery_date']
 
     #def validate_on_submit_2(self):
     #      return super(SendForm, self).validate()

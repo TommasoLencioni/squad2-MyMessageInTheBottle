@@ -18,7 +18,7 @@
     /* Create three equal columns that floats next to each other */
     .column {
     float: left;
-    width: 33.33%;
+    width: 25%;
     padding: 10px;
     }
 
@@ -137,58 +137,75 @@
     {% endfor %}
   </div>
 </div>
-
 <div class="container p-0">
-    <h1 class="h3 mt-3 mb-3">Drafts</h1>
+    <h1 class="h3 mt-3 mb-3">Draft</h1>
 
-<div class="px-4 d-none d-md-block">
-    <div class="d-flex align-items-center">
-        <div class="flex-grow-1">
-            <input type="text" class="form-control my-3" placeholder="Search...">
+        <div class="px-4 d-none d-md-block">
+            <div class="d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <input type="text" class="form-control my-3" placeholder="Search...">
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
-<div class="row">
-<div style="width: 16%; float: left; padding: 10px;">
-<h2 class="h3 mt-3 mb-3">Reciever</h2>
-{% for message in draftMessages: %}
-<a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
-    <div class="d-flex align-items-start">
-        <div class="flex-grow-1 ml-3">
-            {{message[1].nickname}}
+        <div class="row">
+        <div style="width: 16%; float: left; padding: 10px;">
+        <h2 class="h3 mt-3 mb-3">Reciever</h2>
+        {% for message in draftMessages: %}
+        <a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
+            <div class="d-flex align-items-start">
+                <div class="flex-grow-1 ml-3">
+                    {{message[1].nickname}}
+                    
+                    </div>
             </div>
-    </div>
-</a>
-{% endfor %}
-</div>
-<div style="width: 67%; float: left; padding: 10px;">
-<h2 class="h3 mt-3 mb-3">Body</h2>
-{% for message in draftMessages: %}
-<a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
-    <div class="d-flex align-items-start">
-        <div class="flex-grow-1 ml-3">
-            {{message[0].body}}
-            
+        </a>
+        {% endfor %}
+        </div>
+
+        <div style="width: 67%; float: left; padding: 10px;">
+            <h2 class="h3 mt-3 mb-3">Body</h2>
+            {% for message in draftMessages: %}
+            <a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
+                <div class="d-flex align-items-start">
+                    <div class="flex-grow-1 ml-3">
+                        {{message[0].body}}
+                        <!--  <button style="margin-left:250px;" onclick="alert('Hello Campers')">Sample</button> -->
+                        </div>
+                </div>
+            </a>
+            {% endfor %}
             </div>
-    </div>
-</a>
-{% endfor %}
-</div>
-
-<div style="width: 17%; float: left; padding: 10px;"> 
-<h2 class="h3 mt-3 mb-3">Delivery date</h2>
-{% for message in draftMessages: %}
-    <div class="d-flex align-items-start">
-        <div class="flex-grow-1 ml-3">
-            <input type="button" value="Click Me" style="float: right;">
+        <div style="width: 17%; float: left; padding: 10px; margin-top:50px;">
+            <h2 class="h3 mt-3 mb-3"></h2>
+            {% for message in draftMessages: %}
+                <div class="d-flex align-items-start">
+                    <div class="flex-grow-1 ml-3">
+                            <input style="margin-top:10px; margin-bottom: 10px;" type='button' value='Click to Redirect' onclick='redirectPage()' />
+                            <!-- <button style="margin-top:10px; margin-bottom: 10px;" onclick="redirtectPage()">Edit</button> -->
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <script>
+            let redirectPage = function() {
+                const url = "/send?user=nick";
+                window.location.href = url;
+            }
+        </script>
+        <!-- <div style="width: 34%; float: left; padding: 10px;">
+        {% for message in draftMessages: %}
+        <a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
+            <div class="d-flex align-items-start">
+                <div class="flex-grow-1 ml-3">
+                    <a>Click ME</a>
+                    </div>
             </div>
-    </div>
-{% endfor %}
+        </a>
+        {% endfor %}
+        </div> -->
 </div>
 
-
-</div>
     </div>
     {% else %}
 Hi Anonymous, <a href="/login">log in</a> or <a href="/create_user">create an account</a>
