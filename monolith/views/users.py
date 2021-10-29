@@ -171,6 +171,11 @@ def inbox():
         #new_user_list=[]
         #for elem in user_list.all():
         #    new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
-        return render_template("mailbox.html", messages=_recMessages, sendMessages=_sentMessages, message_and_users=message_and_users.all())
+        message_and_users_2 = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
+        print(message_and_users_2)
+        nickname_list=[]
+        for elem in message_and_users_2.all():
+            print(str(elem[1].nickname))
+        return render_template("mailbox.html", messages=_recMessages, sendMessages=_sentMessages, message_and_users=message_and_users.all(), message_and_users_2=message_and_users_2.all())
     else:
         return redirect('/login')

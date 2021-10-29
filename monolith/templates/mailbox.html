@@ -99,12 +99,12 @@
 
 <div class="row">
   <div style="width: 16%; float: left; padding: 10px;">
-    <h2 class="h3 mt-3 mb-3">Sender ID</h2>
-    {% for message in sendMessages: %}
+    <h2 class="h3 mt-3 mb-3">Receiver</h2>
+    {% for message in message_and_users_2: %}
         <a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
             <div class="d-flex align-items-start">
                 <div class="flex-grow-1 ml-3">
-                    {{message.sender_id}}
+                    {{message[1].nickname}}
                     </div>
             </div>
         </a>
@@ -112,12 +112,12 @@
   </div>
 
   <div style="width: 17%; float: left; padding: 10px;">
-    <h2 class="h3 mt-3 mb-3">Message ID</h2>
+    <h2 class="h3 mt-3 mb-3">Delivery date</h2>
     {% for message in sendMessages: %}
         <a class="list-group-item list-group-item-action border-1" style="background-color:#ccc;">
             <div class="d-flex align-items-start">
                 <div class="flex-grow-1 ml-3">
-                    {{message.message_id}}
+                    {{message.delivery_date}}
                     </div>
             </div>
         </a>
