@@ -52,68 +52,71 @@ def create_user():
 def send():
     form = SendForm()
     if request.method == 'POST':
-        print(form.data)
-        #if form.validate_on_submit_2():
-        new_message = Message()
-        form.populate_obj(new_message)
+        if form.data is not None and form.data['recipient'] is not None:
+            #if form.validate_on_submit_2():
+            new_message = Message()
+            form.populate_obj(new_message)
 
-        #the value of the recipient_id
-        receiver_id = db.session.query(User).filter(User.nickname == request.form["recipient"])
-        new_message.receiver_id = receiver_id.first().id
-        print(new_message.receiver_id)
+            #the value of the recipient_id
+            receiver_id = db.session.query(User).filter(User.nickname == request.form["recipient"])
+            new_message.receiver_id = receiver_id.first().id
+            #print(new_message.receiver_id)
+            #print('Text should be here: ' + new_message.body)
 
-        #new_message.body = request.form['body']
-        print('Text should be here: ' + new_message.body)
+            #is_draft values 
+            if request.form['submit_button'] == 'Save as draft':
+                new_message.is_draft = True
+            else:
+                new_message.is_draft = False
+            #print(new_message.is_draft)
 
-        print(new_message.message_id)
+            print('Prima'+str(new_message.delivery_date))
+            if form.data['delivery_date'] is None:
+                new_message.delivery_date=date.today()
+            print('Dopo'+str(new_message.delivery_date))
+            sender= db.session.query(User).filter(User.id == current_user.id)
+            new_message.sender_id=sender.first().id
+            #print(new_message.sender_id)
 
-        #is_draft values 
-        if request.form['submit_button'] == 'Save as draft':
-            new_message.is_draft = True
+            #creation date values
+            new_message.creation_date = datetime.date.today()
+            #print(new_message.creation_date)
+
+            #db adding
+            db.session.add(new_message)
+            db.session.commit()
+            #print('ID e ' + str(new_message.message_id))
+            q = db.session.query(User).filter(User.id == current_user.id)
+            #TODO blacklist
+            user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.id != 1)
+            #print(user_list.all())
+            new_user_list=[]
+            for elem in user_list.all():
+                new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
+            if new_message.is_draft:
+                return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list, is_draft=True) #TOFIX This redirect to sending_messages
+            else:
+                return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list, is_sent=True) #TOFIX This redirect to sending_messages
         else:
-            new_message.is_draft = False
-        print(new_message.is_draft)
-
-        #new_message.delivery_date = request.form['delivery_date']
-        print(new_message.delivery_date)
-
-        sender= db.session.query(User).filter(User.id == current_user.id)
-        new_message.sender_id=sender.first().id
-        print(new_message.sender_id)
-
-        #creation date values
-        new_message.creation_date = datetime.date.today()
-        print(new_message.creation_date)
-
-        #db adding
-        db.session.add(new_message)
-        db.session.commit()
-        print('ID e ' + str(new_message.message_id))
-        q = db.session.query(User).filter(User.id == current_user.id)
-        #TODO blacklist
-        user_list = db.session.query(User.nickname).filter(User.id != current_user.id)
-        #print(user_list.all())
-        new_user_list=[]
-        for elem in user_list.all():
-            new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
-        if new_message.is_draft:
-            return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list, is_draft=True) #TOFIX This redirect to sending_messages
-        else:
-            return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list, is_sent=True) #TOFIX This redirect to sending_messages
-        #else:
-        #    print("ERROREEEE validate")
+            #TODO blacklist
+            user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.id != 1)
+            #print(user_list.all())
+            new_user_list=[]
+            for elem in user_list.all():
+                new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
+            #print(new_user_list)
+            q = db.session.query(User).filter(User.id == current_user.id)
+            return render_template("send.html", current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list, none_recipient=True)
     elif request.method == 'GET':
         if current_user is not None and hasattr(current_user, 'id'):
             #TODO blacklist
-            user_list = db.session.query(User.nickname).filter(User.id != current_user.id)
+            user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.id != 1)
             #print(user_list.all())
             new_user_list=[]
             for elem in user_list.all():
                 new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
             print(new_user_list)
             q = db.session.query(User).filter(User.id == current_user.id)
-            #print(q.firstname)
-            #print(q.first().firstname)
             return render_template("send.html", current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list)
         else:
             welcome = None
