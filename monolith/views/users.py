@@ -54,36 +54,37 @@ def send():
     if request.method == 'POST':
         if form.data is not None and form.data['recipient'] is not None:
             #if form.validate_on_submit_2():
-            new_message = Message()
-            form.populate_obj(new_message)
+            for nick in form.data['recipient']:
+                new_message = Message()
+                form.populate_obj(new_message)
 
-            #the value of the recipient_id
-            receiver_id = db.session.query(User).filter(User.nickname == request.form["recipient"])
-            new_message.receiver_id = receiver_id.first().id
-            #print(new_message.receiver_id)
-            #print('Text should be here: ' + new_message.body)
+                #the value of the recipient_id
+                receiver_id = db.session.query(User).filter(User.nickname == nick)
+                new_message.receiver_id = receiver_id.first().id
+                #print(new_message.receiver_id)
+                #print('Text should be here: ' + new_message.body)
 
-            #is_draft values 
-            if request.form['submit_button'] == 'Save as draft':
-                new_message.is_draft = True
-            else:
-                new_message.is_draft = False
-            #print(new_message.is_draft)
+                #is_draft values 
+                if request.form['submit_button'] == 'Save as draft':
+                    new_message.is_draft = True
+                else:
+                    new_message.is_draft = False
+                #print(new_message.is_draft)
 
-            print('Prima'+str(new_message.delivery_date))
-            if form.data['delivery_date'] is None:
-                new_message.delivery_date=date.today()
-            print('Dopo'+str(new_message.delivery_date))
-            sender= db.session.query(User).filter(User.id == current_user.id)
-            new_message.sender_id=sender.first().id
-            #print(new_message.sender_id)
+                print('Prima'+str(new_message.delivery_date))
+                if form.data['delivery_date'] is None:
+                    new_message.delivery_date=date.today()
+                print('Dopo'+str(new_message.delivery_date))
+                sender= db.session.query(User).filter(User.id == current_user.id)
+                new_message.sender_id=sender.first().id
+                #print(new_message.sender_id)
 
-            #creation date values
-            new_message.creation_date = datetime.date.today()
-            #print(new_message.creation_date)
+                #creation date values
+                new_message.creation_date = datetime.date.today()
+                #print(new_message.creation_date)
 
-            #db adding
-            db.session.add(new_message)
+                #db adding
+                db.session.add(new_message)
             db.session.commit()
             #print('ID e ' + str(new_message.message_id))
             q = db.session.query(User).filter(User.id == current_user.id)

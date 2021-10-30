@@ -30,7 +30,7 @@ class UserForm(FlaskForm):
                 return result
 
 class SendForm(FlaskForm):
-    recipient = f.SelectField('Recipient', validators=[DataRequired()])
+    recipient = f.SelectMultipleField('Recipient', validators=[DataRequired()])
     #recipient = f.TextField('Recipient', validators=[DataRequired()])
     body = f.TextAreaField('Message', render_kw={"placeholder": "Message goes here"}, validators=[DataRequired()])
     delivery_date = f.DateField('Delivery date', format='%d/%m/%Y', render_kw={"placeholder": "DD/MM/YYYY"})
