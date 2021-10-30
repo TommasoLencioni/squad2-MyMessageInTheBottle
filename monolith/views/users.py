@@ -5,7 +5,7 @@ from sqlalchemy import select
 import time
 import datetime
 from flask import Blueprint, redirect, render_template, request
-from flask_login import current_user
+from flask_login import current_user, logout_user
 
 from monolith.database import User, db, Message
 from monolith.forms import UserForm, SendForm
@@ -155,6 +155,7 @@ def delete_account():
                 query = db.session.query(User).filter(User.id == current_user.id)
                 query.first().is_deleted=True
                 db.session.commit()
+                logout_user()
             return render_template('delete.html', is_deleted=True)
         else:
             return redirect('/')
