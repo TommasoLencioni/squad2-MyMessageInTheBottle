@@ -162,9 +162,10 @@ def delete_account():
 @users.route('/mailbox', methods=['GET'])
 def inbox():
     if current_user is not None and hasattr(current_user, 'id'):
-        _recMessages = db.session.query(Message).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False)
+        _recMessages = db.session.query(Message).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.delivery_date<=datetime.datetime.today())
+        print(date.today())
         _sentMessages = db.session.query(Message).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False)
-        message_and_users = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id)
+        message_and_users = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today())
         print(message_and_users)
         nickname_list=[]
         for elem in message_and_users.all():
