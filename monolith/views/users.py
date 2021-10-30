@@ -50,13 +50,11 @@ def create_user():
 
 @users.route('/send', methods=['POST', 'GET'])
 def send():
-    m = request.args.get("reciever")
-    n = request.args.get("body")
+    draftReciever = request.args.get("reciever")
+    draftBody = request.args.get("body")
     form = SendForm()
-    if ((m is not None) and (n is not None)):
-        form.recipient.data=m
-        form.body.data=n
-
+    if draftBody is not None:
+        form.body.data=draftBody
     if request.method == 'POST':
         print(form.data)
         #if form.validate_on_submit_2():
@@ -102,25 +100,36 @@ def send():
         new_user_list=[]
         for elem in user_list.all():
             new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
+        del new_user_list[0]
+        dictUS = {}
+        for el in new_user_list:
+                dictUS[el] = 0
+        if draftReciever is not None:
+            dictUS[draftReciever] = 1
         if new_message.is_draft:
-            return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list, is_draft=True) #TOFIX This redirect to sending_messages
+            return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS, is_draft=True) #TOFIX This redirect to sending_messages
         else:
-            return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list, is_sent=True) #TOFIX This redirect to sending_messages
+            return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS, is_sent=True) #TOFIX This redirect to sending_messages
         #else:
         #    print("ERROREEEE validate")
     elif request.method == 'GET':
         if current_user is not None and hasattr(current_user, 'id'):
             #TODO blacklist
             user_list = db.session.query(User.nickname).filter(User.id != current_user.id)
-            #print(user_list.all())
             new_user_list=[]
             for elem in user_list.all():
                 new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
             print(new_user_list)
+            del new_user_list[0]
+            dictUS = {}
+            for el in new_user_list:
+                dictUS[el] = 0
+            if draftReciever is not None:
+                dictUS[draftReciever] = 1
             q = db.session.query(User).filter(User.id == current_user.id)
             #print(q.firstname)
             #print(q.first().firstname)
-            return render_template("send.html", current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=new_user_list)
+            return render_template("send.html", current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS)
         else:
             welcome = None
             return redirect('/login')
