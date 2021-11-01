@@ -10,8 +10,12 @@
                 <dl>
                 <p>Recipient</p>
                 <select name="recipient" onChange="changeSizeInput()" id="recipient">
-                    {% for user in user_list %}
-                        <option value="{{user}}">{{user}}</option>
+                    {% for user in user_list.keys() %}
+                        {% if user_list[user] == 1 %}
+                            <option selected="selected" value="{{user}}">{{user}} </option>
+                        {%else%}
+                        <option value="{{user}}">{{user}} </option>
+                        {% endif %}
                     {% endfor %}
                 </select>
                 {% for field in form.display %}
@@ -34,7 +38,7 @@
                 window.setTimeout(function(){
         
                 // TODO move to sent messages
-                window.location.href = "/";
+                window.location.href = "/mailbox";
         
                 }, 2500);
             </script>
