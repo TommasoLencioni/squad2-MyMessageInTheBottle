@@ -9,7 +9,7 @@
                 {{ form.hidden_tag() }}
                 <dl>
                 <p>Recipient</p>
-                <select name="recipient" onChange="changeSizeInput()" id="recipient">
+                <select name="recipient" onChange="changeSizeInput()" multiple id="recipient">
                     {% for user in user_list.keys() %}
                         {% if user_list[user] == 1 %}
                             <option selected="selected" value="{{user}}">{{user}} </option>
