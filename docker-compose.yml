@@ -1,0 +1,69 @@
+version: "3.3"
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    links:
+      - redis
+    depends_on:
+      - redis
+    environment:
+      - FLASK_ENV=development
+    volumes:
+      - .:/src
+      
+  redis:
+    container_name: redis
+    image: redis:alpine
+    hostname: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - .:/src
+        
+  celery_worker:
+    build:
+      context: .
+    hostname: worker
+    entrypoint: celery
+    command: -A monolith.views.tasks.celery worker --loglevel=info
+    links:
+      - redis
+    depends_on:
+      - redis
+    volumes:
+      - .:/src
+
+#  celery_beat:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    image: flask_celery_example_celery_beat
+#    command: /start-celerybeat
+#    volumes:
+#      - .:.
+#    env_file:
+#      - .
+#    environment:
+#      - FLASK_APP=app
+#    depends_on:
+#      - redis
+
+#  flower:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    image: flask_celery_example_celery_flower
+#    command: /start-flower
+#    volumes:
+#      - .:.
+#    env_file:
+#      - .
+#    environment:
+#      - FLASK_APP=app
+#    ports:
+#      - 5557:5555
+#    depends_on:
+#      - redis
