@@ -5,10 +5,28 @@ from flask import Flask
 from monolith.auth import login_manager
 from monolith.database import User, db
 from monolith.views import blueprints
+from celery import Celery
 
+def make_celery(app):
+    celery = Celery(
+        app.import_name,
+        backend=app.config['CELERY_RESULT_BACKEND'],
+        broker=app.config['CELERY_BROKER_URL']
+    )
+    celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
 
 def create_app():
     app = Flask(__name__)
+    app.config['CELERY_BROKER_URL'] = 'redis://redis:6379'
+    app.config['CELERY_RESULT_BACKEND'] = 'redis://redis:6379'
     app.config['WTF_CSRF_SECRET_KEY'] = 'A SECRET KEY'
     app.config['SECRET_KEY'] = 'ANOTHER ONE'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../mmiab.db'
@@ -41,6 +59,7 @@ def create_app():
 
 
 app = create_app()
+celery = make_celery(app)
 
 if __name__ == '__main__':
     app.run()

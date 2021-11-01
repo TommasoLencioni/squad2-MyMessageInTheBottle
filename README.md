@@ -14,10 +14,10 @@ University of Pisa.
 |Name and Surname  | Email                         |
 |------------------|-------------------------------|
 |Tommaso Lencioni  |t.lencioni1@studenti.unipi.it  |
-|Leonardo Talerico |l.talerico@studenti.unipi.it             |
+|Leonardo Talerico |l.talerico@studenti.unipi.it   |
 |Gabriele Sipione  |@studenti.unipi.it             |
 |Usman Shahzad     |u.shahzad1@studenti.unipi.it   |
-|Filippo           |f.dolente@studenti.unipi.it             |
+|Filippo           |f.dolente@studenti.unipi.it    |
 
 
 ## Instructions
@@ -37,4 +37,9 @@ inside the project's root.
 
 To run the project execute the following command:
 
-`./run.sh`
+For the first time:
+
+	`docker-compose build`
+	`docker-compose up`
+Else:
+	`docker-compose up`

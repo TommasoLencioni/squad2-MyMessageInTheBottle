@@ -11,6 +11,8 @@ from monolith.database import User, db, Message
 from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
 
+from .tasks import create_task
+
 users = Blueprint('users', __name__)
 
 
@@ -157,3 +159,9 @@ def inbox():
         return render_template("mailbox.html", messages=_recMessages.all(), sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
     else:
         return redirect('/login')
+
+@users.route("/tasks", methods=["POST", "GET"])
+def run_task():
+    task = create_task.delay(int(5))
+    task.wait()
+    return({"value":"done"})
