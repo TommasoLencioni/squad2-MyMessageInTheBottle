@@ -33,25 +33,19 @@
                 <input type=submit name="submit_button" value="Send" style="height:40px; width:150px">
             </form>
             {% if is_sent %}
-            <h1>The message has been successfully sent!</h1>
             <script>    
                 window.setTimeout(function(){
-        
-                // TODO move to sent messages
                 window.location.href = "/mailbox";
         
-                }, 2500);
+                }, 0);
             </script>
             {% endif %}
             {% if is_draft %}
-            <h1>The message has been successfully saved as a draft!</h1>
             <script>    
                 window.setTimeout(function(){
+                window.location.href = "/mailbox";
         
-                // TODO move to drafts
-                window.location.href = "/";
-        
-                }, 2500);
+                }, 0);
             </script>
             {% endif %}
             {% if none_recipient %}

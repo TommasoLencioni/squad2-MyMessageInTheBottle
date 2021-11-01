@@ -5,7 +5,7 @@ from sqlalchemy import select
 import time
 import datetime
 from flask import Blueprint, redirect, render_template, request
-from flask_login import current_user
+from flask_login import current_user, logout_user
 
 from monolith.database import User, db, Message
 from monolith.forms import UserForm, SendForm
@@ -57,26 +57,23 @@ def send():
         form.body.data=draftBody
     if request.method == 'POST':
         if form.data is not None and form.data['recipient'] is not None:
-            new_message = Message()
-            form.populate_obj(new_message)
-            #the value of the recipient_id
-            receiver_id = db.session.query(User).filter(User.nickname == request.form["recipient"])
-            new_message.receiver_id = receiver_id.first().id
-
-            #is_draft values 
-            if request.form['submit_button'] == 'Save as draft':
-                new_message.is_draft = True
-            else:
-                new_message.is_draft = False
+            for nick in form.data['recipient']:
+                new_message = Message()
+                form.populate_obj(new_message)
+                receiver_id = db.session.query(User).filter(User.nickname == nick)
+                new_message.receiver_id = receiver_id.first().id
                 
-            sender= db.session.query(User).filter(User.id == current_user.id)
-            new_message.sender_id=sender.first().id
-            
-            if form.data['delivery_date'] is None:
-                new_message.delivery_date=date.today()
-                
-            #db adding
-            db.session.add(new_message)
+                if request.form['submit_button'] == 'Save as draft':
+                    new_message.is_draft = True
+                else:
+                    new_message.is_draft = False
+                    
+                if form.data['delivery_date'] is None:
+                    new_message.delivery_date=date.today()
+                    
+                sender= db.session.query(User).filter(User.id == current_user.id)
+                new_message.sender_id=sender.first().id
+                db.session.add(new_message)
             db.session.commit()
             print('ID e ' + str(new_message.message_id))
             q = db.session.query(User).filter(User.id == current_user.id)
@@ -146,6 +143,7 @@ def delete_account():
                 query = db.session.query(User).filter(User.id == current_user.id)
                 query.first().is_deleted=True
                 db.session.commit()
+                logout_user()
             return render_template('delete.html', is_deleted=True)
         else:
             return redirect('/')
@@ -153,8 +151,8 @@ def delete_account():
 @users.route('/mailbox', methods=['GET'])
 def inbox():
     if current_user is not None and hasattr(current_user, 'id'):
-        _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id)
-        _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
+        _sentMessages = db.session.query(Message).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False)
+        _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today())
         _draftMessage = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == True).filter(Message.receiver_id==User.id)
         return render_template("mailbox.html", messages=_recMessages.all(), sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
     else:
