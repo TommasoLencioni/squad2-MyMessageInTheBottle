@@ -3,7 +3,6 @@
 {% block content %}
 <html>
     <body>
-        {% if current_user.is_authenticated %}
             <h1>Write a message</h1>
             <h2>{{current_user_firstname}}</h2>
             <form action="" method="POST">
@@ -55,9 +54,9 @@
                 }, 2500);
             </script>
             {% endif %}
-        {% else %}
-            Hi Anonymous, <a href="/login">Log in</a>
-        {% endif %}
+            {% if none_recipient %}
+                <h1>The recipient is empty!</h1>
+            {% endif %}
     </body>
 </html>
 {% endblock %}
