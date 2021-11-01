@@ -151,7 +151,7 @@ def delete_account():
 @users.route('/mailbox', methods=['GET'])
 def inbox():
     if current_user is not None and hasattr(current_user, 'id'):
-        _sentMessages = db.session.query(Message).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False)
+        _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
         _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today())
         _draftMessage = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == True).filter(Message.receiver_id==User.id)
         return render_template("mailbox.html", messages=_recMessages.all(), sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
