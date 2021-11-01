@@ -180,7 +180,7 @@
             {% for message in draftMessages: %}
                 <div class="d-flex align-items-start">
                     <div class="flex-grow-1 ml-3">
-                            <input style="margin-top:10px; margin-bottom: 10px;" type='button' value='Click to Redirect' onclick='
+                            <input style="margin-top:10px; margin-bottom: 10px;" type='button' value='Edit' onclick='
                                 window.location.href = `/send?reciever={{message[1].nickname}}&body={{message[0].body}}`;' />
                             <!-- <button style="margin-top:10px; margin-bottom: 10px;" onclick="redirtectPage()">Edit</button> -->
                     </div>

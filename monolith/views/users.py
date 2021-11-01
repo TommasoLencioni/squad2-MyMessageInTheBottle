@@ -81,7 +81,7 @@ def send():
             print('ID e ' + str(new_message.message_id))
             q = db.session.query(User).filter(User.id == current_user.id)
             #TODO blacklist
-            user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.isAdmin == False)
+            user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)
             #print(user_list.all())
             new_user_list=[]
             for elem in user_list.all():
@@ -99,7 +99,7 @@ def send():
     elif request.method == 'GET':
         if current_user is not None and hasattr(current_user, 'id'):
             #TODO blacklist
-            user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.isAdmin == False)
+            user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)
             new_user_list=[]
             for elem in user_list.all():
                 new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
