@@ -72,9 +72,11 @@ def send():
                     
                 if form.data['delivery_date'] is None:
                     new_message.delivery_date=date.today()
-                    
+
+                new_message.creation_date=date.today()
                 sender= db.session.query(User).filter(User.id == current_user.id)
                 new_message.sender_id=sender.first().id
+                new_message.opened = False
                 db.session.add(new_message)
             db.session.commit()
             print('ID e ' + str(new_message.message_id))
@@ -165,3 +167,18 @@ def run_task():
     task = create_task.delay(int(5))
     task.wait()
     return({"value":"done"})
+
+@users.route("/message/<id>", methods=["POST", "GET"])
+def message_view(id):
+    query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
+    if query.first() != None:
+        message=query.first()
+        if (not message[0].receiver_id == current_user.id) or (message[0].delivery_date>datetime.datetime.today()):
+            return 'You can\'t read this message!'
+        else:
+            if not message[0].opened:
+                message[0].opened = True
+                db.session.commit()
+            return render_template('message.html', message=message)
+    else:
+        return 'You can\'t read this message!'

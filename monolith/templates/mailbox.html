@@ -93,10 +93,14 @@
                     {% endfor %}
                 </div>
 
-                <div style="width: 60%; float: left; padding: 10px;">
+                <div style="width: 50%; float: left; padding: 10px;">
                     <h2 class="h3 mt-3 mb-3">Body</h2>
                     {% for message in messages: %}
-                        <a class="list-group-item list-group-item-iB border-1" style="background-color:#ccc;">
+                        {% if not message[0].opened %}
+                            <a class="list-group-item list-group-item-iB border-1" style="background-color:rgb(255, 0, 0);">
+                        {% else %}
+                            <a class="list-group-item list-group-item-iB border-1" style="background-color:#ccc;">
+                        {% endif %}
                             <div class="d-flex align-items-start">
                                 <div class="flex-grow-1 ml-3">
                                     {{message[0].body}}
@@ -112,6 +116,17 @@
                             <div class="flex-grow-1 ml-3">
                                 <input style="margin-top:2px; margin-bottom: 7px;" type='button' class="btn btn-success" value='Forward' onclick='
                                     window.location.href = `/send?body={{message[0].body}}`;' />
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
+                    <h2 class="h4 mt-4 mb-4"></h2>
+                    {% for message in messages: %}
+                        <div class="d-flex align-items-start">
+                            <div class="flex-grow-1 ml-3">
+                                <input style="margin-top:2px; margin-bottom: 7px; margin-left: 10px;" type='button' class="btn btn-success" value='Open' onclick='
+                                    window.location.href = `/message/{{message[0].message_id}}`;' />
                             </div>
                         </div>
                     {% endfor %}
