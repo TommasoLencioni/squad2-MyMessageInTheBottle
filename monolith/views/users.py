@@ -179,7 +179,9 @@ def inbox():
         _draftMessage = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == True).filter(Message.receiver_id==User.id)
         new_rec_list = [] 
         if _filter_word.first() is not None:
+            print(_recMessages.all())
             for message in _recMessages.all():
+                print(message)
                 new_filter_word_list = _filter_word.first().list.split(',')
                 control_flag = 0
                 for elem in new_filter_word_list:
@@ -189,7 +191,7 @@ def inbox():
                 if control_flag == 0:
                     new_rec_list.append(message)
                 print(new_rec_list)
-                return render_template("mailbox.html", messages=new_rec_list, sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
+            return render_template("mailbox.html", messages=new_rec_list, sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
         else:
             return render_template("mailbox.html", messages=_recMessages.all(), sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
     else:
