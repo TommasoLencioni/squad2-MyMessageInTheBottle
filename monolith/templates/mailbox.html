@@ -2,69 +2,79 @@
 {% block title %}Inbox{% endblock %}
 {% block content %}
 
-<h1>My Message in a Bottle -- Primer</h1>
+<h1>My Message in a Bottle</h1>
 {% if current_user.is_authenticated %}
-  Hi {{ current_user.firstname }}! This is your mailbox!
+  <h3>Hi {{ current_user.firstname }}! This is your mailbox!</h3>
 
-<!-- Improve the layout accoring with the draft -->
 <html>
     <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-    * {
-    box-sizing: border-box;
-    }
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+        * {
+        box-sizing: border-box;
+        }
 
-    /* Create three equal columns that floats next to each other */
-    .column {
-    float: left;
-    width: 25%;
-    padding: 10px;
-    }
+        /* Create three equal columns that floats next to each other */
+        .column {
+        float: left;
+        width: 25%;
+        padding: 10px;
+        }
 
-    /* Clear floats after the columns */
-    .row:after {
-    content: "";
-    display: table;
-    clear: both;
-    }
-    </style>
-</head>
+        /* Clear floats after the columns */
+        .row:after {
+        content: "";
+        display: table;
+        clear: both;
+        }
+
+        #div2{display: none;}
+        #div3{display: none;}
+        </style>
+    </head>
     <body>
+        <button class="btn btn-primary" onclick="ShowInbox()">Inbox</button>
+        <button class="btn btn-primary" onclick="ShowSent()">Sent</button>
+        <button class="btn btn-primary" onclick="ShowDraft()">Draft</button>
 
+        <script type="text/javascript">
+            function ShowInbox() {
+                document.getElementById('div1').style.display = "block";
+                document.getElementById('div2').style.display = "none";
+                document.getElementById('div3').style.display = "none";
+            }
+            function ShowSent() {
+                document.getElementById('div1').style.display = "none";
+                document.getElementById('div2').style.display = "block";
+                document.getElementById('div3').style.display = "none";
+            }
+            function ShowDraft() {
+                document.getElementById('div1').style.display = "none";
+                document.getElementById('div2').style.display = "none";
+                document.getElementById('div3').style.display = "block";
+            }
+        </script>
 
-        <div class="container p-0">
+        <div class="container p-0" id="div1">
             <h1 class="h3 mt-3 mb-3">Inbox</h1>
 
-                <div class="px-4 d-none d-md-block">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <input type="text" class="form-control my-3" placeholder="Search...">
-                        </div>
+            <div class="px-4 d-none d-md-block">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <input type="text" class="form-control my-3" placeholder="Search...">
                     </div>
                 </div>
+            </div>
 
-        <div class="row">
-          <div style="width: 16%; float: left; padding: 10px;">
-            <h2 class="h3 mt-3 mb-3">Sender</h2>
-            {% for message in messages: %}
-                <a class="list-group-item list-group-item-iSender border-1" style="background-color:#ccc;">
-                    <div class="d-flex align-items-start">
-                        <div class="flex-grow-1 ml-3">
-                            {{message[1].nickname}}
-                        </div>
-                    </div>
-                </a>
-            {% endfor %}
-          </div>
-
-          <div style="width: 17%; float: left; padding: 10px;">
-            <h2 class="h3 mt-3 mb-3">Delivery date</h2>
-            {% for message in messages: %}
-                <a class="list-group-item list-group-item-iD border-1" style="background-color:#ccc;">
-                    <div class="d-flex align-items-start">
-                        <div class="flex-grow-1 ml-3">
-                            {{message[0].delivery_date}}
+            <div class="row">
+                <div style="width: 16%; float: left; padding: 10px;">
+                    <h2 class="h3 mt-3 mb-3">Sender</h2>
+                    {% for message in messages: %}
+                        <a class="list-group-item list-group-item-iSender border-1" style="background-color:#ccc;">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1 ml-3">
+                                    {{message[1].nickname}}
+                                </div>
                             </div>
                     </div>
                 </a>
@@ -89,114 +99,163 @@
                                 window.location.href = `/message/{{message[0].message_id}}`;' />
             {% endfor %}
           </div>
+
+                <div style="width: 17%; float: left; padding: 10px;">
+                    <h2 class="h3 mt-3 mb-3">Delivery date</h2>
+                    {% for message in messages: %}
+                        <a class="list-group-item list-group-item-iD border-1" style="background-color:#ccc;">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1 ml-3">
+                                    {{message[0].delivery_date}}
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+
+                <div style="width: 60%; float: left; padding: 10px;">
+                    <h2 class="h3 mt-3 mb-3">Body</h2>
+                    {% for message in messages: %}
+                        <a class="list-group-item list-group-item-iB border-1" style="background-color:#ccc;">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1 ml-3">
+                                    {{message[0].body}}
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
+                    <h2 class="h4 mt-4 mb-4"></h2>
+                    {% for message in messages: %}
+                        <div class="d-flex align-items-start">
+                            <div class="flex-grow-1 ml-3">
+                                <input style="margin-top:2px; margin-bottom: 7px;" type='button' class="btn btn-success" value='Forward' onclick='
+                                    window.location.href = `/send?body={{message[0].body}}`;' />
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
 
-
-        <div class="container p-0">
+        <div class="container p-0" id="div2">
             <h1 class="h3 mt-3 mb-3">Sent</h1>
 
-        <div class="px-4 d-none d-md-block">
-            <div class="d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <input type="text" class="form-control my-3" placeholder="Search...">
+            <div class="px-4 d-none d-md-block">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <input type="text" class="form-control my-3" placeholder="Search...">
+                    </div>
                 </div>
             </div>
-        </div>
 
-<div class="row">
-  <div style="width: 16%; float: left; padding: 10px;">
-    <h2 class="h3 mt-3 mb-3">Reciever</h2>
-    {% for message in sendMessages: %}
-        <a class="list-group-item list-group-item-sR border-1" style="background-color:#ccc;">
-            <div class="d-flex align-items-start">
-                <div class="flex-grow-1 ml-3">
-                    {{message[1].nickname}}
-                    </div>
-            </div>
-        </a>
-    {% endfor %}
-  </div>
-
-  <div style="width: 17%; float: left; padding: 10px;">
-    <h2 class="h3 mt-3 mb-3">Delivery date</h2>
-    {% for message in sendMessages: %}
-        <a class="list-group-item list-group-item-sD border-1" style="background-color:#ccc;">
-            <div class="d-flex align-items-start">
-                <div class="flex-grow-1 ml-3">
-                    {{message[0].delivery_date}}
-                    </div>
-            </div>
-        </a>
-    {% endfor %}
-  </div>
-
-  <div style="width: 67%; float: left; padding: 10px;">
-    <h2 class="h3 mt-3 mb-3">Body</h2>
-    {% for message in sendMessages: %}
-        <a class="list-group-item list-group-item-sB border-1" style="background-color:#ccc;">
-            <div class="d-flex align-items-start">
-                <div class="flex-grow-1 ml-3">
-                    {{message[0].body}}
-                    </div>
-            </div>
-        </a>
-    {% endfor %}
-  </div>
-</div>
-<div class="container p-0">
-    <h1 class="h3 mt-3 mb-3">Draft</h1>
-
-        <div class="px-4 d-none d-md-block">
-            <div class="d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <input type="text" class="form-control my-3" placeholder="Search...">
+            <div class="row">
+                <div style="width: 16%; float: left; padding: 10px;">
+                    <h2 class="h3 mt-3 mb-3">Reciever</h2>
+                    {% for message in sendMessages: %}
+                        <a class="list-group-item list-group-item-sR border-1" style="background-color:#ccc;">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1 ml-3">
+                                    {{message[1].nickname}}
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
                 </div>
-            </div>
-        </div>
 
-        <div class="row">
-        <div style="width: 16%; float: left; padding: 10px;">
-        <h2 class="h3 mt-3 mb-3">Reciever</h2>
-        {% for message in draftMessages: %}
-        <a class="list-group-item list-group-item-dR border-1" style="background-color:#ccc;">
-            <div class="d-flex align-items-start">
-                <div class="flex-grow-1 ml-3">
-                    {{message[1].nickname}}
-                    
-                    </div>
-            </div>
-        </a>
-        {% endfor %}
-        </div>
+                <div style="width: 17%; float: left; padding: 10px;">
+                    <h2 class="h3 mt-3 mb-3">Delivery date</h2>
+                    {% for message in sendMessages: %}
+                        <a class="list-group-item list-group-item-sD border-1" style="background-color:#ccc;">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1 ml-3">
+                                    {{message[0].delivery_date}}
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
 
-        <div style="width: 67%; float: left; padding: 10px;">
-            <h2 class="h3 mt-3 mb-3">Body</h2>
-            {% for message in draftMessages: %}
-            <a class="list-group-item list-group-item-dB border-1" style="background-color:#ccc;">
-                <div class="d-flex align-items-start">
-                    <div id ="ID1" class="flex-grow-dB ml-3">
-                        {{message[0].body}}
+                <div style="width: 60%; float: left; padding: 10px;">
+                    <h2 class="h3 mt-3 mb-3">Body</h2>
+                    {% for message in sendMessages: %}
+                        <a class="list-group-item list-group-item-sB border-1" style="background-color:#ccc;">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1 ml-3">
+                                    {{message[0].body}}
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
+                    <h2 class="h4 mt-4 mb-4"></h2>
+                    {% for message in sendMessages: %}
+                        <div class="d-flex align-items-start">
+                            <div class="flex-grow-1 ml-3">
+                                <input style="margin-top:2px; margin-bottom: 7px;" type='button' class="btn btn-success" value='Forward' onclick='
+                                    window.location.href = `/send?body={{message[0].body}}`;' />
+                            </div>
                         </div>
+                    {% endfor %}
                 </div>
-            </a>
-            {% endfor %}
             </div>
-        <div style="width: 17%; float: left; padding: 10px; margin-top:50px;">
-            <h2 class="h4 mt-4 mb-4"></h2>
-            {% for message in draftMessages: %}
-                <div class="d-flex align-items-start">
-                    <div class="flex-grow-1 ml-3">
-                            <input style="margin-top:10px; margin-bottom: 10px;" type='button' value='Edit' onclick='
-                                window.location.href = `/send?reciever={{message[1].nickname}}&body={{message[0].body}}`;' />
-                            <!-- <button style="margin-top:10px; margin-bottom: 10px;" onclick="redirtectPage()">Edit</button> -->
+        </div>
+
+        <div class="container p-0" id="div3">
+            <h1 class="h3 mt-3 mb-3">Draft</h1>
+
+            <div class="px-4 d-none d-md-block">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <input type="text" class="form-control my-3" placeholder="Search...">
                     </div>
                 </div>
-                
-            {% endfor %}
-        </div>
-</div>
+            </div>
 
-    </div>
+            <div class="row">
+                <div style="width: 16%; float: left; padding: 10px;">
+                    <h2 class="h3 mt-3 mb-3">Reciever</h2>
+                    {% for message in draftMessages: %}
+                        <a class="list-group-item list-group-item-dR border-1" style="background-color:#ccc;">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1 ml-3">
+                                    {{message[1].nickname}}
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+
+                <div style="width: 77%; float: left; padding: 10px;">
+                    <h2 class="h3 mt-3 mb-3">Body</h2>
+                    {% for message in draftMessages: %}
+                        <a class="list-group-item list-group-item-dB border-1" style="background-color:#ccc;">
+                            <div class="d-flex align-items-start">
+                                <div id ="ID1" class="flex-grow-dB ml-3">
+                                    {{message[0].body}}
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+
+                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
+                    <h2 class="h4 mt-4 mb-4"></h2>
+                    {% for message in draftMessages: %}
+                        <div class="d-flex align-items-start">
+                            <div class="flex-grow-1 ml-3">
+                                <input style="margin-top:2px; margin-bottom: 7px;" class="btn btn-danger" type='button' value='Edit' onclick='
+                                    window.location.href = `/send?reciever={{message[1].nickname}}&body={{message[0].body}}`;' />
+                                <!-- <button style="margin-top:10px; margin-bottom: 10px;" onclick="redirtectPage()">Edit</button> -->
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
     {% else %}
 Hi Anonymous, <a href="/login">log in</a> or <a href="/create_user">create an account</a>
 {% endif %}
