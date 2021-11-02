@@ -93,7 +93,7 @@
                     {% endfor %}
                 </div>
 
-                <div style="width: 50%; float: left; padding: 10px;">
+                <div style="width: 40%; float: left; padding: 10px;">
                     <h2 class="h3 mt-3 mb-3">Body</h2>
                     {% for message in messages: %}
                         {% if not message[0].opened %}
@@ -127,6 +127,17 @@
                             <div class="flex-grow-1 ml-3">
                                 <input style="margin-top:2px; margin-bottom: 7px; margin-left: 10px;" type='button' class="btn btn-success" value='Open' onclick='
                                     window.location.href = `/message/{{message[0].message_id}}`;' />
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
+                    <h2 class="h4 mt-4 mb-4"></h2>
+                    {% for message in messages: %}
+                        <div class="d-flex align-items-start">
+                            <div class="flex-grow-1 ml-3">
+                                <input style="margin-top:2px; margin-bottom: 7px; margin-left: 10px;" type='button' class="btn btn-success" value='Delete' onclick='
+                                    window.location.href = `/message/{{message[0].message_id}}?delete=True`;' />
                             </div>
                         </div>
                     {% endfor %}

@@ -55,6 +55,7 @@ class Message(db.Model):
     is_draft = db.Column(db.Boolean, nullable=True)
     body = db.Column(db.Unicode(128), nullable=True)
     opened = db.Column(db.Boolean, nullable=True)
+    deleted = db.Column(db.Boolean, nullable=True)
 
     def __init__(self, *args, **kw):
         super(Message, self).__init__(*args, **kw)
