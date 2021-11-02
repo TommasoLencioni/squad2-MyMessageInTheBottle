@@ -105,11 +105,15 @@ def send():
                     
                 if form.data['delivery_date'] is None:
                     new_message.delivery_date=date.today()
-                    
+
+                new_message.creation_date=date.today()
                 sender= db.session.query(User).filter(User.id == current_user.id)
                 new_message.sender_id=sender.first().id
+                new_message.opened = False
+                new_message.deleted = False
                 _blacklist_control=db.session.query(BlackList).filter(BlackList.user_id==new_message.receiver_id).filter(BlackList.blacklisted_user_id==new_message.sender_id)
                 if _blacklist_control is not None:
+                    #TODO add visula advice
                     print("blacklist rilevata")
                 else:
                     db.session.add(new_message)
@@ -191,7 +195,7 @@ def delete_account():
 def inbox():
     if current_user is not None and hasattr(current_user, 'id'):
         _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
-        _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today())
+        _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today()).filter(Message.deleted==False)
         _draftMessage = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == True).filter(Message.receiver_id==User.id)
         return render_template("mailbox.html", messages=_recMessages.all(), sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
     else:
@@ -202,3 +206,36 @@ def run_task():
     task = create_task.delay(int(5))
     task.wait()
     return({"value":"done"})
+
+@users.route("/message/<id>", methods=["GET", "POST"])
+def message_view(id):
+    deletion = request.args.get("delete")
+    print(deletion)
+    if current_user is not None and hasattr(current_user, 'id'):
+        if deletion != None and deletion:
+            query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id).filter(Message.deleted==False)
+            if query.first() != None:
+                message=query.first()
+                if (not message[0].receiver_id == current_user.id) or (message[0].delivery_date>datetime.datetime.today()):
+                    return 'You can\'t delete this message!'
+                else:
+                    message[0].deleted=True
+                    db.session.commit()
+                    return 'Message deleted!'
+            else:
+                return 'You can\'t delete this message!'
+        else:
+            query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id).filter(Message.deleted==False)
+            if query.first() != None:
+                message=query.first()
+                if (not message[0].receiver_id == current_user.id) or (message[0].delivery_date>datetime.datetime.today()):
+                    return 'You can\'t read this message!'
+                else:
+                    if not message[0].opened:
+                        message[0].opened = True
+                        db.session.commit()
+                    return render_template('message.html', message=message)
+            else:
+                return 'You can\'t read this message!'
+    else:
+        return redirect('/login')
