@@ -59,3 +59,8 @@ class Message(db.Model):
     def __init__(self, *args, **kw):
         super(Message, self).__init__(*args, **kw)
  
+class BlackList(db.Model):
+    __tablename__ = 'blacklist'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    blacklisted_user_id = db.Column(db.Integer, nullable=False)

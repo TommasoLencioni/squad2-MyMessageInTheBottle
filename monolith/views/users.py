@@ -1,13 +1,13 @@
 from datetime import date, datetime
-from re import I
+from re import I, U
 import re
 from sqlalchemy import select
 import time
 import datetime
-from flask import Blueprint, redirect, render_template, request
+from flask import Blueprint, blueprints, redirect, render_template, request
 from flask_login import current_user, logout_user
 
-from monolith.database import User, db, Message
+from monolith.database import BlackList, User, db, Message
 from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
 
@@ -19,7 +19,29 @@ users = Blueprint('users', __name__)
 @users.route('/users')
 def _users():
     if current_user is not None and hasattr(current_user, 'id'):
-        _users = db.session.query(User).filter(User.is_deleted==False)
+        new_blackList = BlackList()
+        new_blackList.user_id = current_user.id
+        print(new_blackList.user_id)
+        new_blackList.blacklisted_user_id = request.args.get("block_user_id")
+        print(new_blackList.blacklisted_user_id)
+        if new_blackList.blacklisted_user_id is not None:
+            if request.args.get("block") == "1":
+                _list = db.session.query(BlackList).filter(BlackList.user_id==new_blackList.user_id).filter(BlackList.blacklisted_user_id==new_blackList.blacklisted_user_id)
+                if _list.first() is not None:
+                    print("già in blacklist")
+                else:
+                    db.session.add(new_blackList)
+                    db.session.commit()
+                    print("inserimento blacklist")
+            else:
+                blacklist_id = db.session.query(BlackList).filter(BlackList.user_id==new_blackList.user_id).filter(BlackList.blacklisted_user_id==new_blackList.blacklisted_user_id)
+                if blacklist_id.first() is not None:
+                    db.session.query(BlackList).filter(BlackList.id==blacklist_id.first().id).delete()
+                    db.session.commit()
+                    print("rimozione blacklist")
+                else:
+                    print("utente non in blacklist")
+        _users = db.session.query(User).filter(User.is_deleted==False).filter(User.id!=current_user.id)
         return render_template("users.html", users=_users)
     else:
         return redirect('/login')
@@ -75,7 +97,11 @@ def send():
                     
                 sender= db.session.query(User).filter(User.id == current_user.id)
                 new_message.sender_id=sender.first().id
-                db.session.add(new_message)
+                _blacklist_control=db.session.query(BlackList).filter(BlackList.user_id==new_message.receiver_id).filter(BlackList.blacklisted_user_id==new_message.sender_id)
+                if _blacklist_control is not None:
+                    print("blacklist rilevata")
+                else:
+                    db.session.add(new_message)
             db.session.commit()
             print('ID e ' + str(new_message.message_id))
             q = db.session.query(User).filter(User.id == current_user.id)

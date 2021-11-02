@@ -36,6 +36,12 @@
                                 </div>
                           </div>
                       </a>
+                      {% if user.id != 1 %}
+                      <input style="margin-top:10px; margin-bottom: 10px;" type='button' value='block' onclick='
+                                window.location.href = `/users?block_user_id={{user.id}}&block=1`;' />
+                      <input style="margin-top:10px; margin-bottom: 10px;" type='button' value='free' onclick='
+                                window.location.href = `/users?block_user_id={{user.id}}&block=0`;' />
+                      {% endif %}
                       {% endfor %}
                      
 
