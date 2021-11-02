@@ -76,9 +76,29 @@
                                     {{message[1].nickname}}
                                 </div>
                             </div>
-                        </a>
-                    {% endfor %}
-                </div>
+                    </div>
+                </a>
+            {% endfor %}
+          </div>
+
+          <div style="width: 67%; float: left; padding: 10px;">
+            <h2 class="h3 mt-3 mb-3">Body</h2>
+            {% for message in messages: %}
+                {% if message[0].is_opening %}
+                    <a class="list-group-item list-group-item-iB border-1" style="background-color:rgb(255, 0, 0);">
+                {% else %}
+                    <a class="list-group-item list-group-item-iB border-1" style="background-color:#ccc;">
+                {% endif %}
+                    <div class="d-flex align-items-start">
+                        <div class="flex-grow-1 ml-3">
+                            {{message[0].body}}
+                            </div>
+                    </div>
+                </a>
+                <input style="margin-top:10px; margin-bottom: 10px;" type='button' value='Open' onclick='
+                                window.location.href = `/message/{{message[0].message_id}}`;' />
+            {% endfor %}
+          </div>
 
                 <div style="width: 17%; float: left; padding: 10px;">
                     <h2 class="h3 mt-3 mb-3">Delivery date</h2>
