@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime as dt
 from re import I
 import re
 from sqlalchemy import select
@@ -72,9 +72,11 @@ def send():
                     
                 if form.data['delivery_date'] is None:
                     new_message.delivery_date=date.today()
-                    
+                new_message.creation_date=date.today()
                 sender= db.session.query(User).filter(User.id == current_user.id)
                 new_message.sender_id=sender.first().id
+                new_message.is_opening = False
+                new_message.opened = False
                 db.session.add(new_message)
             db.session.commit()
             print('ID e ' + str(new_message.message_id))
@@ -155,6 +157,13 @@ def inbox():
     if current_user is not None and hasattr(current_user, 'id'):
         _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
         _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today())
+        for message in _recMessages.all():
+            if not message[0].opened:
+                message[0].is_opening = True
+                message[0].opened = True
+            else:
+                message[0].is_opening = False
+        db.session.commit()
         _draftMessage = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == True).filter(Message.receiver_id==User.id)
         return render_template("mailbox.html", messages=_recMessages.all(), sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
     else:
@@ -165,3 +174,15 @@ def run_task():
     task = create_task.delay(int(5))
     task.wait()
     return({"value":"done"})
+
+@users.route("/message/<id>", methods=["POST", "GET"])
+def message_view(id):
+    query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
+    if query.first() != None:
+        message=query.first()
+        if (not message[0].receiver_id == current_user.id) or (message[0].delivery_date>dt.today()):
+            return 'You can\'t read this message!'
+        else:
+            return render_template('message.html', message=message)
+    else:
+        return 'You can\'t read this message!'

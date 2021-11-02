@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Send{% endblock %}
+{% block content %}
+<h1>Sender: {{message[1].nickname}}</h1>
+<h3>Creation date: {{message[0].creation_date}}</h1>
+<h2>Body:</h2>
+<p>{{message[0].body}}</p>
+{% endblock %}
