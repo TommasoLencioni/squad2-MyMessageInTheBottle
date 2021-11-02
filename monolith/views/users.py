@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from re import I
+from re import I, U
 import re
 from sqlalchemy import select
 import time
@@ -7,7 +7,7 @@ import datetime
 from flask import Blueprint, redirect, render_template, request
 from flask_login import current_user, logout_user
 
-from monolith.database import User, db, Message
+from monolith.database import Filter_list, User, db, Message
 from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
 
@@ -113,7 +113,7 @@ def send():
             welcome = None
             return redirect('/login')
   
-@users.route('/profile', methods=['GET'])
+@users.route('/profile', methods=['GET','POST'])
 def profile():
     """
         This functionality allows to users to view the user's profile.
@@ -122,10 +122,30 @@ def profile():
         If the user who try to access this service is not logged, will be render in the
         'home' page
     """
-    if current_user is not None and hasattr(current_user, 'id'):
-        return render_template("profile_info.html", current_user=current_user)
+    if request.method == 'GET':
+        if current_user is not None and hasattr(current_user, 'id'):
+            user_filter_list = db.session.query(Filter_list).filter(Filter_list.user_id==current_user.id)
+            if user_filter_list.first() is not None:
+                return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
+            else:
+                return render_template("profile_info.html", current_user=current_user,user_filter_list="")
+        else:
+            return redirect('/login')
     else:
-        return redirect('/login')
+        if current_user is not None and hasattr(current_user, 'id'):
+            new_filter = Filter_list()
+            new_filter.list = request.form['filter']
+            new_filter.user_id = current_user.id
+            user_filter_list = db.session.query(Filter_list).filter(Filter_list.user_id==current_user.id)
+            if user_filter_list.first() is not None:
+                db.session.query(Filter_list).filter(Filter_list.user_id==current_user.id).delete()
+                db.session.add(new_filter)
+            else:
+                db.session.add(new_filter)
+            db.session.commit()
+            return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
+        else:
+            return redirect('/login')
 
 
 @users.route('/deleteAccount', methods=['POST','GET'])
@@ -155,8 +175,23 @@ def inbox():
     if current_user is not None and hasattr(current_user, 'id'):
         _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
         _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today())
+        _filter_word = db.session.query(Filter_list).filter(Filter_list.user_id == current_user.id)
         _draftMessage = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == True).filter(Message.receiver_id==User.id)
-        return render_template("mailbox.html", messages=_recMessages.all(), sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
+        new_rec_list = [] 
+        if _filter_word.first() is not None:
+            for message in _recMessages.all():
+                new_filter_word_list = _filter_word.first().list.split(',')
+                control_flag = 0
+                for elem in new_filter_word_list:
+                    if elem != "":
+                        if elem in message[0].body:
+                            control_flag = 1
+                if control_flag == 0:
+                    new_rec_list.append(message)
+                print(new_rec_list)
+                return render_template("mailbox.html", messages=new_rec_list, sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
+        else:
+            return render_template("mailbox.html", messages=_recMessages.all(), sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
     else:
         return redirect('/login')
 

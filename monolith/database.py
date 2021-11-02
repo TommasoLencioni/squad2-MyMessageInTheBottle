@@ -59,3 +59,7 @@ class Message(db.Model):
     def __init__(self, *args, **kw):
         super(Message, self).__init__(*args, **kw)
  
+class Filter_list(db.Model):
+    __tablename__ = 'filter'
+    user_id = db.Column(db.Integer, primary_key=True, nullable=False)
+    list = db.Column(db.Unicode(128), nullable=True)

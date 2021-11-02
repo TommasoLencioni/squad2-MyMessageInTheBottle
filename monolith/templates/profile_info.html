@@ -1,12 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Profile{% endblock %}
 {% block content %}
-      <p><h3> firstname : </h3> {{ current_user.firstname }}</p>
+      <br>
+      <h3> firstname : </h3> {{ current_user.firstname }}
       <h3> surname : </h3>  {{ current_user.lastname }}
       <h3> email : </h3> {{ current_user.email }}
       <h3> birthday : </h3> {{ current_user.date_of_birth }}
       <h3> location : </h3> {{ current_user.location }}
       <h3> nickname : </h3> {{ current_user.nickname }}
+      <form action="" method="POST">
+            <br>
+            <br>
+            <h3>Word filter:</h3>
+            <input type="text" id="filter" name="filter" value="{{user_filter_list}}">
+            <br>
+            <input type="submit" value="Submit">
+      </form>
 {% endblock %}
 
 
