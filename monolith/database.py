@@ -54,12 +54,27 @@ class Message(db.Model):
     creation_date = db.Column(db.DateTime)
     is_draft = db.Column(db.Boolean, nullable=True)
     body = db.Column(db.Unicode(128), nullable=True)
-
+    opened = db.Column(db.Boolean, nullable=True)
+    deleted = db.Column(db.Boolean, nullable=True)
 
     def __init__(self, *args, **kw):
         super(Message, self).__init__(*args, **kw)
  
+
 class Filter_list(db.Model):
     __tablename__ = 'filter'
     user_id = db.Column(db.Integer, primary_key=True, nullable=False)
     list = db.Column(db.Unicode(128), nullable=True)
+
+class BlackList(db.Model):
+    __tablename__ = 'blacklist'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    blacklisted_user_id = db.Column(db.Integer, nullable=False)
+
+class ReportList(db.Model):
+    __tablename__ = 'reportlist'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    reportlisted_user_id = db.Column(db.Integer, nullable=False)
+
