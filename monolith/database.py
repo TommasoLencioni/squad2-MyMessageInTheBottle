@@ -52,6 +52,7 @@ class Message(db.Model):
     receiver_id = db.Column(db.Integer, nullable=False)
     delivery_date = db.Column(db.DateTime)
     creation_date = db.Column(db.DateTime)
+    is_delivered = db.Column(db.Boolean, nullable=False, default = False)
     is_draft = db.Column(db.Boolean, nullable=True)
     body = db.Column(db.Unicode(128), nullable=True)
 

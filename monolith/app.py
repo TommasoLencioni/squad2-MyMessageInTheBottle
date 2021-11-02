@@ -1,11 +1,14 @@
 import datetime
-
 from flask import Flask
-
 from monolith.auth import login_manager
-from monolith.database import User, db
+from monolith.database import User, db, Message
 from monolith.views import blueprints
 from celery import Celery
+import time
+from flask_mail import Mail
+
+
+
 
 def make_celery(app):
     celery = Celery(
@@ -60,6 +63,67 @@ def create_app():
 
 app = create_app()
 celery = make_celery(app)
+
+# *************************************************************************** #
+### CELERY TASKS ###
+
+@celery.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # Calls test('hello') every 10 seconds.
+    sender.add_periodic_task(10.0, check.s('hello'), name='check for new message...')
+
+    # Calls test('world') every 30 seconds
+#    sender.add_periodic_task(30.0, test.s('world'), expires=10)
+
+    # Executes every Monday morning at 7:30 a.m.
+#    sender.add_periodic_task(
+#        crontab(hour=7, minute=30, day_of_week=1),
+#        test.s('Happy Mondays!'),
+#    )
+
+def send_mail(mail):
+    pass
+
+@celery.task
+def check(arg):
+    now = datetime.datetime.now()
+    to_notify = db.session.query(Message).filter(Message.is_delivered == False).filter(Message.delivery_date <= now)
+    print("/////////////////////////////////////////////////////////////////")
+    print(to_notify.all())
+    for item in to_notify.all():
+        user = db.session.query(User).filter(User.id == item.receiver_id)
+        print(user.first().email)
+        #send_mail(user.first().email)
+    
+
+
+@celery.task
+def test(arg):
+    print(arg)
+
+@celery.task
+def add(x, y):
+    z = x + y
+    print(z)
+
+
+@celery.task(name="create_task")
+def create_task(task_type):
+    time.sleep(10)
+    print("hello from celery")
+    return True
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     app.run()
