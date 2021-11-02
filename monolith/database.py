@@ -64,3 +64,9 @@ class BlackList(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, nullable=False)
     blacklisted_user_id = db.Column(db.Integer, nullable=False)
+
+class ReportList(db.Model):
+    __tablename__ = 'reportlist'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    reportlisted_user_id = db.Column(db.Integer, nullable=False)

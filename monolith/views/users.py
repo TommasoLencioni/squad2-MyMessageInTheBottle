@@ -7,7 +7,7 @@ import datetime
 from flask import Blueprint, blueprints, redirect, render_template, request
 from flask_login import current_user, logout_user
 
-from monolith.database import BlackList, User, db, Message
+from monolith.database import BlackList, ReportList, User, db, Message
 from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
 
@@ -20,6 +20,7 @@ users = Blueprint('users', __name__)
 def _users():
     if current_user is not None and hasattr(current_user, 'id'):
         new_blackList = BlackList()
+        new_reportlist = ReportList()
         new_blackList.user_id = current_user.id
         print(new_blackList.user_id)
         new_blackList.blacklisted_user_id = request.args.get("block_user_id")
@@ -33,7 +34,7 @@ def _users():
                     db.session.add(new_blackList)
                     db.session.commit()
                     print("inserimento blacklist")
-            else:
+            elif request.args.get("block") == "0":
                 blacklist_id = db.session.query(BlackList).filter(BlackList.user_id==new_blackList.user_id).filter(BlackList.blacklisted_user_id==new_blackList.blacklisted_user_id)
                 if blacklist_id.first() is not None:
                     db.session.query(BlackList).filter(BlackList.id==blacklist_id.first().id).delete()
@@ -41,6 +42,16 @@ def _users():
                     print("rimozione blacklist")
                 else:
                     print("utente non in blacklist")
+            else:
+                new_reportlist.user_id = current_user.id
+                new_reportlist.reportlisted_user_id = request.args.get("block_user_id")
+                _list = db.session.query(ReportList).filter(ReportList.user_id==new_reportlist.user_id).filter(ReportList.reportlisted_user_id==new_reportlist.reportlisted_user_id)
+                if _list.first() is not None:
+                    print("già segnalato")
+                else:
+                    db.session.add(new_reportlist)
+                    db.session.commit()
+                    print("inserimento reportlist")
         _users = db.session.query(User).filter(User.is_deleted==False).filter(User.id!=current_user.id)
         return render_template("users.html", users=_users)
     else:
