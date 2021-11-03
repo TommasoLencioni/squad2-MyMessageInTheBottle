@@ -264,7 +264,7 @@
                         <div class="d-flex align-items-start">
                             <div class="flex-grow-1 ml-3">
                                 <input style="margin-top:2px; margin-bottom: 7px;" class="btn btn-danger" type='button' value='Edit' onclick='
-                                    window.location.href = `/send?reciever={{message[1].nickname}}&body={{message[0].body}}`;' />
+                                    window.location.href = `/send?draft_id={{message[0].message_id}}`;' />
                                 <!-- <button style="margin-top:10px; margin-bottom: 10px;" onclick="redirtectPage()">Edit</button> -->
                             </div>
                         </div>
