@@ -88,6 +88,7 @@ def create_user():
 def send():
     draftReciever = request.args.get("reciever")
     draftBody = request.args.get("body")
+    isReply = request.args.get("reply")
     form = SendForm()
     if request.method == 'POST':
         if form.data is not None and form.data['recipient'] is not None:
@@ -134,6 +135,10 @@ def send():
     elif request.method == 'GET':
         if draftBody is not None:
             form.body.data=draftBody
+            print('sono qui')
+            if (isReply is not None and isReply) and (draftReciever is not None):
+                if draftReciever is not None:
+                    form.body.data=str(draftReciever)+' wrote:\n'+str(draftBody)+'\n-----------------\n'
         if current_user is not None and hasattr(current_user, 'id'):
             #TODO blacklist
             user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)
