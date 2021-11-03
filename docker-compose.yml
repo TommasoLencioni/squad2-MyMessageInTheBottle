@@ -28,7 +28,7 @@ services:
       context: .
     hostname: worker
     entrypoint: celery
-    command: -A monolith.views.tasks.celery worker --loglevel=info
+    command: -A monolith.app.celery worker --loglevel=info
     links:
       - redis
     depends_on:
@@ -39,7 +39,7 @@ services:
   celery_beat:
     build:
       context: .
-    command: celery -A monolith.views.tasks.celery beat --loglevel=info
+    command: celery -A monolith.app.celery beat --loglevel=info
     volumes:
       - .:/src
     depends_on:

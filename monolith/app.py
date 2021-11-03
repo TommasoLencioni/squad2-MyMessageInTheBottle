@@ -1,11 +1,14 @@
 import datetime
-
 from flask import Flask
-
 from monolith.auth import login_manager
-from monolith.database import User, db
+from monolith.database import User, db, Message
 from monolith.views import blueprints
 from celery import Celery
+import time
+from flask_mail import Mail
+from flask_mail import Message as MessageFlask
+
+
 
 def make_celery(app):
     celery = Celery(
@@ -31,6 +34,12 @@ def create_app():
     app.config['SECRET_KEY'] = 'ANOTHER ONE'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../mmiab.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['MAIL_SERVER']='smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USERNAME'] = 'provaase5@gmail.com'
+    app.config['MAIL_PASSWORD'] = 'qwertyuiop@123'
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
 
     for bp in blueprints:
         app.register_blueprint(bp)
@@ -60,6 +69,65 @@ def create_app():
 
 app = create_app()
 celery = make_celery(app)
+mail = Mail(app)
+
+# *************************************************************************** #
+### CELERY TASKS ###
+
+@celery.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # Calls test('hello') every 60 seconds.
+    sender.add_periodic_task(60.0, checkNewMessage.s('hello'), name='check for new message...')
+
+
+def send_mail(email):
+    print ("sending_mail...")
+    print("mail destinatario:"+str(email))
+    msg = MessageFlask("You have recived a new message!", sender="provaase5@gmail.com", recipients=[email])
+    msg.body = """new message in the "fantastic" social media Message In a Bottle!"""
+    mail.send(msg)
+
+@celery.task
+def checkNewMessage(arg):
+    now = datetime.datetime.now()
+    to_notify = db.session.query(Message).filter(Message.is_delivered == False).filter(Message.delivery_date <= now)
+    print("/////////////////////////////////////////////////////////////////")
+    for item in to_notify.all():
+        user = db.session.query(User).filter(User.id == item.receiver_id)
+        item.is_delivered = True
+        db.session.commit()
+        print(user.first().email)
+        send_mail(user.first().email)
+    
+
+
+@celery.task
+def test(arg):
+    print(arg)
+
+@celery.task
+def add(x, y):
+    z = x + y
+    print(z)
+
+
+@celery.task(name="create_task")
+def create_task(task_type):
+    time.sleep(10)
+    print("hello from celery")
+    return True
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     app.run()

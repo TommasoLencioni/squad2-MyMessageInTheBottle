@@ -13,8 +13,6 @@ from monolith.database import BlackList, ReportList, User, db, Message, Filter_l
 from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
 
-from .tasks import create_task
-
 users = Blueprint('users', __name__)
 
 
@@ -93,6 +91,7 @@ def create_user():
 
 @users.route('/send', methods=['POST', 'GET'])
 def send():
+    isDraft =False
     draftReciever = request.args.get("reciever")
     draftBody = request.args.get("body")
     isReply = request.args.get("reply")
@@ -107,6 +106,7 @@ def send():
                 
                 if request.form['submit_button'] == 'Save as draft':
                     new_message.is_draft = True
+                    isDraft = True
                 else:
                     new_message.is_draft = False
                     
@@ -267,11 +267,6 @@ def inbox():
     else:
         return redirect('/login')
 
-@users.route("/tasks", methods=["POST", "GET"])
-def run_task():
-    task = create_task.delay(int(5))
-    task.wait()
-    return({"value":"done"})
 
 @users.route("/message/<id>", methods=["GET", "POST"])
 def message_view(id):
