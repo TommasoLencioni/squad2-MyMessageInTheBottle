@@ -354,10 +354,10 @@ def calendar():
         events = []
 
         for message in _sentMessages:
-            events.append({'todo' : "Sent: " + str(message[1].nickname), 'date' : str(message[0].delivery_date)})
+            events.append({'todo' : "Sent: " + str(message[1].nickname), 'date' : str(message[0].delivery_date), 'msgID' : str(message[0].message_id)})
 
         for message in _recMessages:
-            events.append({'todo' : "Received: " + str(message[1].nickname), 'date' : str(message[0].delivery_date)})
+            events.append({'todo' : "Received: " + str(message[1].nickname), 'date' : str(message[0].delivery_date), 'msgID' : str(message[0].message_id)})
 
         return render_template('calendar.html', events = events)
     else:

@@ -21,9 +21,19 @@
                 {
                     title : '{{event.todo}}',
                     start : '{{event.date}}',
+                    url : '/message/'+'{{event.msgID}}',
                 },
                 {% endfor %}
-            ]
+            ],
+            eventClick: function(info) {
+
+                info.jsEvent.preventDefault(); // don't let the browser navigate
+
+                if (info.event.url) {
+                  window.open(info.event.url);
+                }
+            }
+
           });
           calendar.render();
         });
