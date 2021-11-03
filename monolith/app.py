@@ -78,13 +78,21 @@ mail = Mail(app)
 def setup_periodic_tasks(sender, **kwargs):
     # Calls test('hello') every 60 seconds.
     sender.add_periodic_task(60.0, checkNewMessage.s('hello'), name='check for new message...')
+    
+    # Calls test('hello') every 60 seconds.
+    sender.add_periodic_task(60.0, checkMessageOpened.s('hello'), name='check for message opened...')
 
 
-def send_mail(email):
+def send_mail(email, body):
     print ("sending_mail...")
     print("mail destinatario:"+str(email))
-    msg = MessageFlask("You have recived a new message!", sender="provaase5@gmail.com", recipients=[email])
-    msg.body = """new message in the "fantastic" social media Message In a Bottle!"""
+    if body is None:
+        msg = MessageFlask("You have recived a new message!", sender="provaase5@gmail.com", recipients=[email])
+        msg.body = """new message in the "fantastic" social media Message In a Bottle!"""
+    elif body is not None:
+        msg = MessageFlask("Your message has been read!", sender="provaase5@gmail.com", recipients=[email])
+        msg.html = """<p>Your message has been read.</p>
+                    <p>Message read:</br>{}</p>""".format(body)
     mail.send(msg)
 
 @celery.task
@@ -97,8 +105,16 @@ def checkNewMessage(arg):
         item.is_delivered = True
         db.session.commit()
         print(user.first().email)
-        send_mail(user.first().email)
-    
+        send_mail(user.first().email, None)
+
+@celery.task
+def checkMessageOpened(arg):
+    to_notify = db.session.query(Message).filter(Message.opened == True).filter(Message.is_opened_notified == False)
+    for item in to_notify.all():
+        user = db.session.query(User).filter(User.id == item.receiver_id)
+        item.is_opened_notified = True
+        db.session.commit()
+        send_mail(user.first().email, item.body)
 
 
 @celery.task
