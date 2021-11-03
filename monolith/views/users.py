@@ -65,6 +65,12 @@ def create_user():
     if not (current_user is not None and hasattr(current_user, 'id')):
         if request.method == 'POST':
             if form.validate_on_submit():
+                email_exist_control = db.session.query(User).filter(User.email==form.email.data)
+                if email_exist_control.first() is not None:
+                    return render_template('create_user.html', form=form)
+                nick_exist_control = db.session.query(User).filter(User.nickname==form.nickname.data)
+                if nick_exist_control.first() is not None:
+                    return render_template('create_user.html', form=form)
                 new_user = User()
                 form.populate_obj(new_user)
                 """
