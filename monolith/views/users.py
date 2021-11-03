@@ -6,6 +6,7 @@ import time
 import datetime
 from flask import Blueprint, blueprints, redirect, render_template, request
 from flask_login import current_user, logout_user
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from monolith.database import BlackList, ReportList, User, db, Message, Filter_list
 
@@ -176,17 +177,37 @@ def profile():
             return redirect('/login')
     else:
         if current_user is not None and hasattr(current_user, 'id'):
-            new_filter = Filter_list()
-            new_filter.list = request.form['filter']
-            new_filter.user_id = current_user.id
-            user_filter_list = db.session.query(Filter_list).filter(Filter_list.user_id==current_user.id)
-            if user_filter_list.first() is not None:
-                db.session.query(Filter_list).filter(Filter_list.user_id==current_user.id).delete()
-                db.session.add(new_filter)
+            if 'filter' in request.form:
+                print("change filter branch")
+                new_filter = Filter_list()
+                new_filter.list = request.form['filter']
+                new_filter.user_id = current_user.id
+                user_filter_list = db.session.query(Filter_list).filter(Filter_list.user_id==current_user.id)
+                if user_filter_list.first() is not None:
+                    db.session.query(Filter_list).filter(Filter_list.user_id==current_user.id).delete()
+                    db.session.add(new_filter)
+                else:
+                    db.session.add(new_filter)
+                db.session.commit()
+                return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
             else:
-                db.session.add(new_filter)
-            db.session.commit()
-            return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
+                print("change info branch")
+                if check_password_hash(current_user.password, request.form['old_password']) :
+                    user_to_modify = db.session.query(User).filter(User.id==current_user.id).first()
+                    user_to_modify.firstname = request.form['firstname']
+                    user_to_modify.lastname = request.form['surname']
+                    user_to_modify.date_of_birth = datetime.datetime.fromisoformat(request.form['birthday'])
+                    user_to_modify.location = request.form['location']
+                    user_to_modify.password = generate_password_hash(request.form['new_password'])
+                    db.session.commit()
+                    print("info changed")
+                else:
+                    print("old password incorrect")
+                user_filter_list = db.session.query(Filter_list).filter(Filter_list.user_id==current_user.id)
+                if user_filter_list.first() is not None:
+                    return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
+                else:
+                    return render_template("profile_info.html", current_user=current_user,user_filter_list="")
         else:
             return redirect('/login')
 

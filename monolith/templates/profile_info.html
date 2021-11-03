@@ -2,17 +2,37 @@
 {% block title %}Profile{% endblock %}
 {% block content %}
       <br>
-      <h3> firstname : </h3> {{ current_user.firstname }}
-      <h3> surname : </h3>  {{ current_user.lastname }}
-      <h3> email : </h3> {{ current_user.email }}
-      <h3> birthday : </h3> {{ current_user.date_of_birth }}
-      <h3> location : </h3> {{ current_user.location }}
-      <h3> nickname : </h3> {{ current_user.nickname }}
-      <form action="" method="POST">
+      <h2>Info</h2>
+      <h5> firstname : </h5> {{ current_user.firstname }}
+      <h5> surname : </h5>  {{ current_user.lastname }}
+      <h5> email : </h5> {{ current_user.email }}
+      <h5> birthday : </h5> {{ current_user.date_of_birth }}
+      <h5> location : </h5> {{ current_user.location }}
+      <h5> nickname : </h5> {{ current_user.nickname }}
+      <br><br><br>
+      <h2>Change Info:</h2>
+      <form action="" method="POST" name="change_info">
+            <h5> firstname : </h5>
+            <input type="text" id="firstname" name="firstname" value="{{current_user.firstname}}">
+            <h5> surname : </h5>
+            <input type="text" id="lastname" name="surname" value="{{current_user.lastname}}">
+            <h5> birthday : </h5>
+            <input type="text" id="birthday" format="%d/%m/%Y" name="birthday" value="{{current_user.date_of_birth}}">
+            <h5> location : </h5>
+            <input type="text" id="location" name="location" value="{{current_user.location}}">
+            <h5> old password : </h5>
+            <input type="text" id="old_password" name="old_password" value="">
+            <h5> new password: </h5>
+            <input type="text" id="new_password" name="new_password" value="">
+            <br><br>
+            <input type="submit" value="change_info">
+      </form>
+      <form action="" method="POST" name="filter">
             <br>
             <br>
-            <h3>Word filter:</h3>
+            <h2>Word filter:</h2>
             <input type="text" id="filter" name="filter" value="{{user_filter_list}}">
+            <br>
             <br>
             <input type="submit" value="Submit">
       </form>
