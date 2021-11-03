@@ -112,7 +112,7 @@ def send():
                 new_message.opened = False
                 new_message.deleted = False
                 _blacklist_control=db.session.query(BlackList).filter(BlackList.user_id==new_message.receiver_id).filter(BlackList.blacklisted_user_id==new_message.sender_id)
-                if _blacklist_control is not None:
+                if _blacklist_control.first() is not None:
                     #TODO add visula advice
                     print("blacklist rilevata")
                 else:
