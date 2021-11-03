@@ -5,4 +5,7 @@
 <h3>Creation date: {{message[0].creation_date}}</h1>
 <h2>Body:</h2>
 <p>{{message[0].body}}</p>
+{% if image_path %}
+<p>{{ image_path }}</p>
+{% endif %}
 {% endblock %}

@@ -56,6 +56,7 @@ class Message(db.Model):
     body = db.Column(db.Unicode(128), nullable=True)
     opened = db.Column(db.Boolean, nullable=True)
     deleted = db.Column(db.Boolean, nullable=True)
+    image = db.Column(db.Unicode(1000000), nullable=True)
 
     def __init__(self, *args, **kw):
         super(Message, self).__init__(*args, **kw)
@@ -77,4 +78,4 @@ class ReportList(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, nullable=False)
     reportlisted_user_id = db.Column(db.Integer, nullable=False)
-
+    

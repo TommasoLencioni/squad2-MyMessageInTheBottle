@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import os
 from re import I, U
 import re
 from sqlalchemy import select
@@ -7,6 +8,7 @@ import datetime
 from flask import Blueprint, blueprints, redirect, render_template, request
 from flask_login import current_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
+import base64
 
 from monolith.database import BlackList, ReportList, User, db, Message, Filter_list
 
@@ -124,6 +126,8 @@ def send():
                     print("blacklist rilevata")
                 else:
                     db.session.add(new_message)
+                if request.files['image_file'] is not None:
+                    new_message.image=base64.b64encode(request.files['image_file'].read())
             db.session.commit()
             q = db.session.query(User).filter(User.id == current_user.id)
             #TODO blacklist
@@ -300,7 +304,19 @@ def message_view(id):
                     if not message[0].opened:
                         message[0].opened = True
                         db.session.commit()
-                    return render_template('message.html', message=message)
+                    #Image render part
+                    if message[0].image is not None:
+                        image_path='./message_attachments/'+str(hash(str(message[0].message_id)+str(message[0].sender_id)+str(message[0].receiver_id)+
+                        str(message[0].body)+str(message[0].creation_date)+str(message[0].creation_date)+str(message[0].delivery_date)))
+                        open(image_path, 'w+b').write(base64.b64decode(message[0].image))
+                        '''
+                        This is a draft of message.html part
+                        <!--{% if image_path %}
+                        <img src="{{ url_for(image_path, _external=True)}}" alt="my text">
+                        <img src="{{ url_for('../message_attachments', filename='immagine_da_hashare', external=True) }}" alt="my text">
+                        {% endif %}-->
+                        '''
+                    return render_template('message.html', message=message, image_path=image_path)
             else:
                 return 'You can\'t read this message!'
     else:

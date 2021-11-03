@@ -350,4 +350,7 @@ flake8-report/
 # sqlalchemy
 *.db
 
+# message images
+/message_attachments/*
+
 # End of https://www.toptal.com/developers/gitignore/api/python,macos,flask,visualstudiocode,jupyternotebooks,linux,pycharm+all,virtualenv
