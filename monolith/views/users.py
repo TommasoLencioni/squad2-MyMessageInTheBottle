@@ -4,7 +4,7 @@ import re
 from sqlalchemy import select
 import time
 import datetime
-from flask import Blueprint, blueprints, redirect, render_template, request
+from flask import Flask, Blueprint, blueprints, redirect, render_template, request
 from flask_login import current_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -303,5 +303,23 @@ def message_view(id):
                     return render_template('message.html', message=message)
             else:
                 return 'You can\'t read this message!'
+    else:
+        return redirect('/login')
+
+@users.route('/calendar')
+def calendar():
+    if current_user is not None and hasattr(current_user, 'id'):
+        _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
+        _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today()).filter(Message.deleted==False)
+
+        events = []
+
+        for message in _sentMessages:
+            events.append({'todo' : "Sent: " + str(message[1].nickname), 'date' : str(message[0].delivery_date)})
+
+        for message in _recMessages:
+            events.append({'todo' : "Received: " + str(message[1].nickname), 'date' : str(message[0].delivery_date)})
+
+        return render_template('calendar.html', events = events)
     else:
         return redirect('/login')
