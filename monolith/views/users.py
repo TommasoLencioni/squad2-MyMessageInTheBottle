@@ -89,8 +89,6 @@ def send():
     draftReciever = request.args.get("reciever")
     draftBody = request.args.get("body")
     form = SendForm()
-    if draftBody is not None:
-        form.body.data=draftBody
     if request.method == 'POST':
         if form.data is not None and form.data['recipient'] is not None:
             for nick in form.data['recipient']:
@@ -119,7 +117,6 @@ def send():
                 else:
                     db.session.add(new_message)
             db.session.commit()
-            print('ID e ' + str(new_message.message_id))
             q = db.session.query(User).filter(User.id == current_user.id)
             #TODO blacklist
             user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)
@@ -132,12 +129,11 @@ def send():
                     dictUS[el] = 0
             if draftReciever is not None:
                 dictUS[draftReciever] = 1
-            if new_message.is_draft:
-                return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS, is_draft=True) #TOFIX This redirect to sending_messages
-            else:
-                return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS, is_sent=True) #TOFIX This redirect to sending_messages
+            return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS, is_submitted=True)
         
     elif request.method == 'GET':
+        if draftBody is not None:
+            form.body.data=draftBody
         if current_user is not None and hasattr(current_user, 'id'):
             #TODO blacklist
             user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)

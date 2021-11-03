@@ -32,15 +32,7 @@
                 <input type=submit name="submit_button" value="Save as draft" style="height:40px; width:150px">
                 <input type=submit name="submit_button" value="Send" style="height:40px; width:150px">
             </form>
-            {% if is_sent %}
-            <script>    
-                window.setTimeout(function(){
-                window.location.href = "/mailbox";
-        
-                }, 0);
-            </script>
-            {% endif %}
-            {% if is_draft %}
+            {% if is_submitted %}
             <script>    
                 window.setTimeout(function(){
                 window.location.href = "/mailbox";
