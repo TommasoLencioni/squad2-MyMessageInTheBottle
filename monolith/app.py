@@ -6,7 +6,7 @@ from monolith.views import blueprints
 from celery import Celery
 import time
 from flask_mail import Mail
-
+from flask_mail import Message as MessageFlask
 
 
 
@@ -34,6 +34,12 @@ def create_app():
     app.config['SECRET_KEY'] = 'ANOTHER ONE'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../mmiab.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['MAIL_SERVER']='smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USERNAME'] = 'provaase5@gmail.com'
+    app.config['MAIL_PASSWORD'] = 'qwertyuiop@123'
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
 
     for bp in blueprints:
         app.register_blueprint(bp)
@@ -63,37 +69,35 @@ def create_app():
 
 app = create_app()
 celery = make_celery(app)
+mail = Mail(app)
 
 # *************************************************************************** #
 ### CELERY TASKS ###
 
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    # Calls test('hello') every 10 seconds.
-    sender.add_periodic_task(10.0, check.s('hello'), name='check for new message...')
+    # Calls test('hello') every 60 seconds.
+    sender.add_periodic_task(60.0, checkNewMessage.s('hello'), name='check for new message...')
 
-    # Calls test('world') every 30 seconds
-#    sender.add_periodic_task(30.0, test.s('world'), expires=10)
 
-    # Executes every Monday morning at 7:30 a.m.
-#    sender.add_periodic_task(
-#        crontab(hour=7, minute=30, day_of_week=1),
-#        test.s('Happy Mondays!'),
-#    )
-
-def send_mail(mail):
-    pass
+def send_mail(email):
+    print ("sending_mail...")
+    print("mail destinatario:"+str(email))
+    msg = MessageFlask("You have recived a new message!", sender="provaase5@gmail.com", recipients=[email])
+    msg.body = """new message in the "fantastic" social media Message In a Bottle!"""
+    mail.send(msg)
 
 @celery.task
-def check(arg):
+def checkNewMessage(arg):
     now = datetime.datetime.now()
     to_notify = db.session.query(Message).filter(Message.is_delivered == False).filter(Message.delivery_date <= now)
     print("/////////////////////////////////////////////////////////////////")
-    print(to_notify.all())
     for item in to_notify.all():
         user = db.session.query(User).filter(User.id == item.receiver_id)
+        item.is_delivered = True
+        db.session.commit()
         print(user.first().email)
-        #send_mail(user.first().email)
+        send_mail(user.first().email)
     
 
 
