@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Send{% endblock %}
 {% block content %}
+{%if mode=='received'%}
 <h1>Sender: {{message[1].nickname}}</h1>
+{% else %}
+<h1>Receiver: {{message[1].nickname}}</h1>
+{% endif %}
 <h3>Creation date: {{message[0].creation_date}}</h1>
 <h2>Body:</h2>
 <p>{{message[0].body}}</p>
