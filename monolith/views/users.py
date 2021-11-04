@@ -211,17 +211,14 @@ def profile():
         If the user who try to access this service is not logged, will be render in the
         'home' page
     """
-    if request.method == 'GET':
-        if current_user is not None and hasattr(current_user, 'id'):
+    if current_user is not None and hasattr(current_user, 'id'):
+        if request.method == 'GET':
             user_filter_list = db.session.query(Filter_list).filter(Filter_list.user_id==current_user.id)
             if user_filter_list.first() is not None:
                 return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
             else:
                 return render_template("profile_info.html", current_user=current_user,user_filter_list="")
         else:
-            return redirect('/login')
-    else:
-        if current_user is not None and hasattr(current_user, 'id'):
             if 'filter' in request.form:
                 print("change filter branch")
                 new_filter = Filter_list()
@@ -253,8 +250,8 @@ def profile():
                     return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
                 else:
                     return render_template("profile_info.html", current_user=current_user,user_filter_list="")
-        else:
-            return redirect('/login')
+    else:
+        return redirect('/login')
 
 
 @users.route('/deleteAccount', methods=['POST','GET'])
