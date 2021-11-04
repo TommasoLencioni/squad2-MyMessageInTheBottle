@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from re import I, U
 import re
+from types import MethodDescriptorType
+from flask.helpers import flash
 from sqlalchemy import select
 import time
 import datetime
@@ -8,7 +10,7 @@ from flask import Blueprint, blueprints, redirect, render_template, request
 from flask_login import current_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from monolith.database import BlackList, ReportList, User, db, Message, Filter_list
+from monolith.database import BlackList, ReportList, User, db, Message, Filter_list,Lottery
 
 from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
@@ -300,3 +302,31 @@ def message_view(id):
                 return 'You can\'t read this message!'
     else:
         return redirect('/login')
+
+@users.route("/lottery", methods=["GET","POST"])
+def lottery():
+    
+    if current_user is not None and hasattr(current_user, 'id'):
+        lottery_query=db.session.query(Lottery).filter(Lottery.contestant_id == current_user.id).all()
+        print(lottery_query)
+        if request.method == "POST":
+                if(not lottery_query):  #double-check security in case of a post request via CLI
+                    new_contestant = Lottery()
+                    new_contestant.contestant_id = current_user.id
+                    print("utente aggiunto al db lottery:" + str(current_user.id) )
+                    db.session.add(new_contestant)
+                    db.session.commit()
+                
+                    flash("You're partecipating to the lottery!")
+                    return render_template("lottery.html")
+                else:
+                    flash("You're already partecipating to the lottery!")
+                    return redirect("/mailbox")
+        elif request.method == "GET":
+                is_partecipating = 1
+                if(not lottery_query):
+                    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                    is_partecipating = 0
+                return render_template("lottery.html", is_partecipating = is_partecipating)
+    else:
+        return redirect('/login') 

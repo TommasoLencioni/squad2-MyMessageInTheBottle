@@ -21,6 +21,7 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     is_deleted = db.Column(db.Boolean, default=False)
     is_anonymous = False
+    lottery_points = db.Column(db.Integer, default = 0)
    # blacklist = db.Column(db.Enum(db.Integer)) #This enum contains the id of the users that this user blacklisted
     #we need to define a class Enum.
     
@@ -62,7 +63,10 @@ class Message(db.Model):
 
     def __init__(self, *args, **kw):
         super(Message, self).__init__(*args, **kw)
- 
+
+class Lottery(db.Model):
+    __tablename__ = 'lottery'
+    contestant_id = db.Column(db.Integer, primary_key=True)
 
 class Filter_list(db.Model):
     __tablename__ = 'filter'

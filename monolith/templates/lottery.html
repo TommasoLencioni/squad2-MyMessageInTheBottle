@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Lottery{% endblock %}
+{% block content %}
+<html>
+    <body>
+        <h1>Lottery</h1>
+        <form action="" method="POST">
+            {% if is_partecipating == 1 %}
+                <div>YOU'RE ALREADY A CONTESTANT!</div>
+            {%else%}
+                    <input class="btn btn-danger" type=submit name="submit_button" value='JOIN' onclick='alert("PARTECIPATING!!")' />
+            {% endif %}
+        </form>
+    </body>
+</html>
+{% endblock %}
