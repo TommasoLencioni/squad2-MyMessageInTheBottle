@@ -330,18 +330,24 @@ def message_view(id):
             else:
                 return 'You can\'t delete this message!'
         else:
+            #Received messages
             query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id).filter(Message.deleted==False)
             if query.first() != None:
                 message=query.first()
-                if (not message[0].receiver_id == current_user.id) or (message[0].delivery_date>datetime.datetime.today()):
-                    return 'You can\'t read this message!'
-                else:
+                if message[0].receiver_id == current_user.id and message[0].delivery_date<=datetime.datetime.today():
                     if not message[0].opened:
                         message[0].opened = True
                         db.session.commit()
-                    return render_template('message.html', message=message)
-            else:
-                return 'You can\'t read this message!'
+                    return render_template('message.html', message=message, mode='received')
+            
+            #Sent messages (DON'T FILTER FOR DELETED MESSAGES OTHERWISE THE SENDER KNOWS THAT THE MESSAGE IS DELETED BY THE RECIPIENT)
+            query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
+            if query.first() != None:
+                message=query.first()
+                if message[0].sender_id == current_user.id:
+                    return render_template('message.html', message=message, mode='sent')
+            
+            return 'You can\'t read this message!'
     else:
         return redirect('/login')
 
