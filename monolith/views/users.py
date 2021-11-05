@@ -6,7 +6,7 @@ from flask.helpers import flash
 from sqlalchemy import select
 import time
 import datetime
-from flask import Blueprint, blueprints, redirect, render_template, request
+from flask import Blueprint, blueprints, redirect, render_template, request, abort
 from flask_login import current_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -14,6 +14,9 @@ from monolith.database import BlackList, ReportList, User, db, Message, Filter_l
 
 from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
+from random import randint
+
+POINT_NECESSARY = 1
 
 users = Blueprint('users', __name__)
 
@@ -174,17 +177,16 @@ def profile():
         If the user who try to access this service is not logged, will be render in the
         'home' page
     """
-    if request.method == 'GET':
-        if current_user is not None and hasattr(current_user, 'id'):
+    if current_user is not None and hasattr(current_user, 'id'):
+
+        if request.method == 'GET':
             user_filter_list = db.session.query(Filter_list).filter(Filter_list.user_id==current_user.id)
             if user_filter_list.first() is not None:
                 return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
             else:
                 return render_template("profile_info.html", current_user=current_user,user_filter_list="")
-        else:
-            return redirect('/login')
-    else:
-        if current_user is not None and hasattr(current_user, 'id'):
+
+        elif request.method == 'POST':
             if 'filter' in request.form:
                 print("change filter branch")
                 new_filter = Filter_list()
@@ -216,8 +218,8 @@ def profile():
                     return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
                 else:
                     return render_template("profile_info.html", current_user=current_user,user_filter_list="")
-        else:
-            return redirect('/login')
+    else:
+        return redirect('/login')
 
 
 @users.route('/deleteAccount', methods=['POST','GET'])
@@ -245,6 +247,28 @@ def delete_account():
 @users.route('/mailbox', methods=['GET'])
 def inbox():
     if current_user is not None and hasattr(current_user, 'id'):
+        # WITHDRAW MESSAGE (LOTTERY POINT)
+        if request.args.get("lottery") :
+            if current_user.lottery_points >= POINT_NECESSARY:
+                # azzera punti della lotteria
+                current_user.lottery_points -= POINT_NECESSARY
+
+                # prendi un messaggio destinato all'utente corrente e cambia la data di invio
+                _lotteryMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date>datetime.datetime.today()).filter(Message.deleted==False)
+                lotMsg = _lotteryMessages.all()
+                if lotMsg:
+                    randIndex = randint(0,len(lotMsg)-1)
+                    lotMsg = _lotteryMessages.all()[randIndex]
+                    
+                    # inserire nel body del messaggio la data di invio originaria
+                    lotMsg[0].body = "Predetermined delivery date: {}\n".format(lotMsg[0].delivery_date) + lotMsg[0].body 
+                    lotMsg[0].delivery_date = datetime.datetime.today()
+                    db.session.commit()
+            else:
+                flash("You don't have the necessary point for withdraw a message!")
+                return redirect("/mailbox")
+            
+            
         _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
         _filter_word = db.session.query(Filter_list).filter(Filter_list.user_id == current_user.id)
         _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today()).filter(Message.deleted==False)
@@ -318,7 +342,7 @@ def lottery():
                     db.session.commit()
                 
                     flash("You're partecipating to the lottery!")
-                    return render_template("lottery.html")
+                    return redirect("/mailbox")
                 else:
                     flash("You're already partecipating to the lottery!")
                     return redirect("/mailbox")

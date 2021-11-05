@@ -85,7 +85,7 @@ def setup_periodic_tasks(sender, **kwargs):
 
     # LOTTERY: Executes every month
     sender.add_periodic_task(
-        crontab(hour=19, minute=00, day_of_month='4'), lottery.s())
+        crontab(hour=15, minute=20, day_of_month='5'), lottery.s())
 
 def send_mail(email, body):
     print ("sending_mail...")
@@ -138,9 +138,10 @@ def checkMessageOpened():
 
     # For-each message flag it as notified and send an email to the user
     for item in to_notify.all():
-        user = db.session.query(User).filter(User.id == item.receiver_id)
+        user = db.session.query(User).filter(User.id == item.sender_id)
         item.is_opened_notified = True
         db.session.commit()
+        print(user.first().email)
         send_mail(user.first().email, item.body)
 
 
@@ -158,10 +159,10 @@ def lottery():
         print(user.contestant_id)
         list_participant.append(user.contestant_id)
     
-    #Reset monthly lottery table TODO
-    #addresses = db.session.query(Lottery)
-    #addresses.delete()
-    #db.session.commit()
+    #Reset monthly lottery table
+    addresses = db.session.query(Lottery)
+    addresses.delete()
+    db.session.commit()
 
     if len(list_participant) == 0:
         return 0
