@@ -101,6 +101,10 @@ def send():
     form = SendForm()
     if request.method == 'POST':
         if form.data is not None and form.data['recipient'] is not None:
+            if request.files['image_file'] is not None:
+                image_binary=base64.b64encode(request.files['image_file'].read())
+            else:
+                image_binary = ""
             for nick in form.data['recipient']:
                 new_message = Message()
                 form.populate_obj(new_message)
@@ -125,9 +129,8 @@ def send():
                     #TODO add visula advice
                     print("blacklist rilevata")
                 else:
+                    new_message.image= image_binary.decode('utf-8')
                     db.session.add(new_message)
-                if request.files['image_file'] is not None:
-                    new_message.image=base64.b64encode(request.files['image_file'].read())
             db.session.commit()
             q = db.session.query(User).filter(User.id == current_user.id)
             #TODO blacklist
