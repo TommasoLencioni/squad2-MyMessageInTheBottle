@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import os
 from re import I, U
 import re
 from sqlalchemy import select
@@ -8,6 +9,7 @@ from flask import Flask, Blueprint, blueprints, redirect, render_template, reque
 from flask_login import current_user, logout_user
 from sqlalchemy.orm import query
 from werkzeug.security import check_password_hash, generate_password_hash
+import base64
 
 from monolith.database import BlackList, ReportList, User, db, Message, Filter_list
 
@@ -101,6 +103,10 @@ def send():
     form = SendForm()
     if request.method == 'POST':
         if form.data is not None and form.data['recipient'] is not None:
+            if request.files['image_file'] is not None:
+                image_binary=base64.b64encode(request.files['image_file'].read())
+            else:
+                image_binary = ""
             if request.form['submit_button'] == "Send":
                 if draft_id is not None:
                     draft_message=db.session.query(Message).filter(Message.message_id==draft_id).delete()
@@ -108,16 +114,13 @@ def send():
                     new_message = Message()
                     form.populate_obj(new_message)
                     receiver_id = db.session.query(User).filter(User.nickname == nick)
-                    new_message.receiver_id = receiver_id.first().id
-                    
+                    new_message.receiver_id = receiver_id.first().id   
                     if request.form['submit_button'] == 'Save as draft':
                         new_message.is_draft = True
                     else:
                         new_message.is_draft = False
-                        
                     if form.data['delivery_date'] is None:
                         new_message.delivery_date=date.today()
-
                     new_message.creation_date=date.today()
                     sender= db.session.query(User).filter(User.id == current_user.id)
                     new_message.sender_id=sender.first().id
@@ -129,7 +132,6 @@ def send():
                         print("blacklist rilevata")
                     else:
                         db.session.add(new_message)
-
             elif request.form['submit_button'] == 'Send as message':
                 draft_message=db.session.query(Message).filter(Message.message_id==draft_id).first()
                 draft_message.is_draft=False
@@ -148,8 +150,8 @@ def send():
                     #TODO add visula advice
                     print("blacklist rilevata")
                 else:
-                    db.session.add(draft_message)
-
+                    new_message.image= image_binary.decode('utf-8')
+                    db.session.add(new_message)
             elif request.form['submit_button'] == "Save changes":
                 draft_message=db.session.query(Message).filter(Message.message_id==draft_id).first()
                 for nick in form.data['recipient']:
@@ -336,6 +338,8 @@ def message_view(id):
                         message[0].opened = True
                         db.session.commit()
                     return render_template('message.html', message=message, mode='received')
+            else:
+                return 'You can\'t read this message!'
             
             #Sent messages (DON'T FILTER FOR DELETED MESSAGES OTHERWISE THE SENDER KNOWS THAT THE MESSAGE IS DELETED BY THE RECIPIENT)
             query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
@@ -343,8 +347,8 @@ def message_view(id):
                 message=query.first()
                 if message[0].sender_id == current_user.id:
                     return render_template('message.html', message=message, mode='sent')
-            
-            return 'You can\'t read this message!'
+            else:
+            	return 'You can\'t read this message!'
     else:
         return redirect('/login')
 
