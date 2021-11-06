@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Inbox{% endblock %}
+{% block title %}Mailbox{% endblock %}
 {% block content %}
 
 <h1>My Message in a Bottle</h1>
@@ -128,7 +128,7 @@
                     {% for message in messages: %}
                         <div class="d-flex align-items-start">
                             <div class="flex-grow-1 ml-3">
-                                <input style="margin-top:2px; margin-bottom: 7px;" type='button' class="btn btn-success" value='Reply' onclick='
+                                <input style="margin-top:2px; margin-bottom: 7px; margin-left: 10px;" type='button' class="btn btn-success" value='Reply' onclick='
                                     window.location.href = `/send?reciever={{message[1].nickname}}&body={{message[0].body}}&reply=True`;' />
                             </div>
                         </div>
@@ -196,8 +196,7 @@
                         </a>
                     {% endfor %}
                 </div>
-
-                <div style="width: 60%; float: left; padding: 10px;">
+                <div style="width: 40%; float: left; padding: 10px;">
                     <h2 class="h3 mt-3 mb-3">Body</h2>
                     {% for message in sendMessages: %}
                         <a class="list-group-item list-group-item-sB border-1" style="background-color:#ccc;">
@@ -210,6 +209,17 @@
                                 </div>
                             </div>
                         </a>
+                    {% endfor %}
+                </div>
+                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
+                    <h2 class="h4 mt-4 mb-4"></h2>
+                    {% for message in sendMessages: %}
+                        <div class="d-flex align-items-start">
+                            <div class="flex-grow-1 ml-3">
+                                <input style="margin-top:2px; margin-bottom: 7px; margin-left: 10px;" type='button' class="btn btn-success" value='Open' onclick='
+                                    window.location.href = `/message/{{message[0].message_id}}`;' />
+                            </div>
+                        </div>
                     {% endfor %}
                 </div>
                 <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
@@ -273,7 +283,7 @@
                         <div class="d-flex align-items-start">
                             <div class="flex-grow-1 ml-3">
                                 <input style="margin-top:2px; margin-bottom: 7px;" class="btn btn-danger" type='button' value='Edit' onclick='
-                                    window.location.href = `/send?reciever={{message[1].nickname}}&body={{message[0].body}}`;' />
+                                    window.location.href = `/send?draft_id={{message[0].message_id}}`;' />
                                 <!-- <button style="margin-top:10px; margin-bottom: 10px;" onclick="redirtectPage()">Edit</button> -->
                             </div>
                         </div>
