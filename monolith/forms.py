@@ -22,12 +22,11 @@ class UserForm(FlaskForm):
     display = ['email', 'firstname', 'lastname', 'password', 'date_of_birth','nickname','location']
 
     def validate_on_submit(self):
-            result = super(UserForm, self).validate()
-            print(str(self.date_of_birth.data)+"data")
+            #result = super(UserForm, self).validate()
             if (self.date_of_birth.data is not None and self.date_of_birth.data>date.today()):
                 return False
             else:
-                return result
+                return True
 
 class SendForm(FlaskForm):
     recipient = f.SelectMultipleField('Recipient', validators=[DataRequired()])

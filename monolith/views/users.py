@@ -5,7 +5,7 @@ import re
 from sqlalchemy import select
 import time
 import datetime
-from flask import Flask, Blueprint, blueprints, redirect, render_template, request
+from flask import Flask, Blueprint, blueprints, redirect, render_template, request, flash
 from flask_login import current_user, logout_user
 from sqlalchemy.orm import query
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -70,10 +70,13 @@ def create_user():
             if form.validate_on_submit():
                 email_exist_control = db.session.query(User).filter(User.email==form.email.data)
                 if email_exist_control.first() is not None:
-                    return render_template('create_user.html', form=form)
+                    #return render_template('create_user.html', form=form)
+                    flash("This email is already registered, please try another!")
+                    return redirect("/create_user")
                 nick_exist_control = db.session.query(User).filter(User.nickname==form.nickname.data)
                 if nick_exist_control.first() is not None:
-                    return render_template('create_user.html', form=form)
+                    flash("This nickname is not available, please try another!")
+                    return redirect("/create_user")
                 new_user = User()
                 form.populate_obj(new_user)
                 """
