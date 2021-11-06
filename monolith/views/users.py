@@ -107,7 +107,7 @@ def send():
                 image_binary=base64.b64encode(request.files['image_file'].read())
             else:
                 image_binary = ""
-            if request.form['submit_button'] == "Send":
+            if request.form['submit_button'] == "Send" or request.form['submit_button'] == 'Save as draft':
                 if draft_id is not None:
                     draft_message=db.session.query(Message).filter(Message.message_id==draft_id).delete()
                 for nick in form.data['recipient']:
@@ -131,6 +131,7 @@ def send():
                         #TODO add visula advice
                         print("blacklist rilevata")
                     else:
+                        new_message.image= image_binary.decode('utf-8')
                         db.session.add(new_message)
             elif request.form['submit_button'] == 'Send as message':
                 draft_message=db.session.query(Message).filter(Message.message_id==draft_id).first()
@@ -150,15 +151,20 @@ def send():
                     #TODO add visula advice
                     print("blacklist rilevata")
                 else:
-                    new_message.image= image_binary.decode('utf-8')
-                    db.session.add(new_message)
+                    draft_message.image= image_binary.decode('utf-8')
+                    db.session.add(draft_message)
             elif request.form['submit_button'] == "Save changes":
                 draft_message=db.session.query(Message).filter(Message.message_id==draft_id).first()
                 for nick in form.data['recipient']:
                     receiver_id = db.session.query(User).filter(User.nickname == nick)
                     draft_message.receiver_id = receiver_id.first().id
-                draft_message.body=form.data['body']
-                db.session.add(draft_message)
+                    draft_message.body=form.data['body']
+                    if form.data['delivery_date'] is None:
+                        draft_message.delivery_date=date.today()
+                    else:
+                        draft_message.delivery_date=form.data['delivery_date']
+                    draft_message.image= image_binary.decode('utf-8')
+                    db.session.add(draft_message)
             db.session.commit()
             q = db.session.query(User).filter(User.id == current_user.id)
             #TODO blacklist
@@ -330,7 +336,7 @@ def message_view(id):
                 return 'You can\'t delete this message!'
         else:
             #Received messages
-            query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id).filter(Message.deleted==False)
+            query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.deleted==False)
             if query.first() != None:
                 message=query.first()
                 if message[0].receiver_id == current_user.id and message[0].delivery_date<=datetime.datetime.today():
@@ -338,8 +344,6 @@ def message_view(id):
                         message[0].opened = True
                         db.session.commit()
                     return render_template('message.html', message=message, mode='received')
-            else:
-                return 'You can\'t read this message!'
             
             #Sent messages (DON'T FILTER FOR DELETED MESSAGES OTHERWISE THE SENDER KNOWS THAT THE MESSAGE IS DELETED BY THE RECIPIENT)
             query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
