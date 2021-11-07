@@ -26,17 +26,19 @@
             <input type="text" id="birthday" format="%d/%m/%Y" name="birthday" value="{{current_user.date_of_birth}}">
             <h5> location : </h5>
             <input type="text" id="location" name="location" value="{{current_user.location}}">
-            <h5> old password : </h5>
-            <input type="text" id="old_password" name="old_password" value="">
             <h5> new password: </h5>
             <input type="text" id="new_password" name="new_password" value="">
             <br><br>
-            <input type="submit" value="change_info">
+            <h5> Insert the password to confirm changes: </h5>
+            <p> (The old one if you are changing it) </p>
+            <input type="text" id="old_password" name="old_password" value="">
+            <input type="submit" value="Save changes">
       </form>
       <form action="" method="POST" name="filter">
             <br>
             <br>
             <h2>Word filter:</h2>
+            <h5>(insert words separated by commas)</h5>
             <input type="text" id="filter" name="filter" value="{{user_filter_list}}">
             <br>
             <br>

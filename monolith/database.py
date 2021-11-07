@@ -60,6 +60,7 @@ class Message(db.Model):
     opened = db.Column(db.Boolean, nullable=True)                           # True when the message is opened by the recipient
     is_opened_notified = db.Column(db.Boolean, nullable=True, default = False)               # True when the notification is send for an opened message
     deleted = db.Column(db.Boolean, nullable=True)                          # True when a message is delete
+    image = db.Column(db.Unicode(1000000), nullable=True)
 
     def __init__(self, *args, **kw):
         super(Message, self).__init__(*args, **kw)
@@ -84,4 +85,4 @@ class ReportList(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, nullable=False)
     reportlisted_user_id = db.Column(db.Integer, nullable=False)
-
+    

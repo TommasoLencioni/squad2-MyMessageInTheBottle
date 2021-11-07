@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import os
 from re import I, U
 import re
 from types import MethodDescriptorType
@@ -6,9 +7,11 @@ from flask.helpers import flash
 from sqlalchemy import select
 import time
 import datetime
-from flask import Blueprint, blueprints, redirect, render_template, request, abort
+from flask import Flask,Blueprint, blueprints, redirect, render_template, request, abort
 from flask_login import current_user, logout_user
+from sqlalchemy.orm import query
 from werkzeug.security import check_password_hash, generate_password_hash
+import base64
 
 from monolith.database import BlackList, ReportList, User, db, Message, Filter_list,Lottery
 
@@ -100,35 +103,72 @@ def send():
     draftReciever = request.args.get("reciever")
     draftBody = request.args.get("body")
     isReply = request.args.get("reply")
+    draft_id = request.args.get('draft_id')
     form = SendForm()
     if request.method == 'POST':
         if form.data is not None and form.data['recipient'] is not None:
-            for nick in form.data['recipient']:
-                new_message = Message()
-                form.populate_obj(new_message)
-                receiver_id = db.session.query(User).filter(User.nickname == nick)
-                new_message.receiver_id = receiver_id.first().id
-                
-                if request.form['submit_button'] == 'Save as draft':
-                    new_message.is_draft = True
-                    isDraft = True
-                else:
-                    new_message.is_draft = False
-                    
+            if request.files['image_file'] is not None:
+                image_binary=base64.b64encode(request.files['image_file'].read())
+            else:
+                image_binary = ""
+            if request.form['submit_button'] == "Send" or request.form['submit_button'] == 'Save as draft':
+                if draft_id is not None:
+                    draft_message=db.session.query(Message).filter(Message.message_id==draft_id).delete()
+                for nick in form.data['recipient']:
+                    new_message = Message()
+                    form.populate_obj(new_message)
+                    receiver_id = db.session.query(User).filter(User.nickname == nick)
+                    new_message.receiver_id = receiver_id.first().id   
+                    if request.form['submit_button'] == 'Save as draft':
+                        new_message.is_draft = True
+                    else:
+                        new_message.is_draft = False
+                    if form.data['delivery_date'] is None:
+                        new_message.delivery_date=date.today()
+                    new_message.creation_date=date.today()
+                    sender= db.session.query(User).filter(User.id == current_user.id)
+                    new_message.sender_id=sender.first().id
+                    new_message.opened = False
+                    new_message.deleted = False
+                    _blacklist_control=db.session.query(BlackList).filter(BlackList.user_id==new_message.receiver_id).filter(BlackList.blacklisted_user_id==new_message.sender_id)
+                    if _blacklist_control.first() is not None:
+                        #TODO add visula advice
+                        print("blacklist rilevata")
+                    else:
+                        new_message.image= image_binary.decode('utf-8')
+                        db.session.add(new_message)
+            elif request.form['submit_button'] == 'Send as message':
+                draft_message=db.session.query(Message).filter(Message.message_id==draft_id).first()
+                draft_message.is_draft=False
+                for nick in form.data['recipient']:
+                    receiver_id = db.session.query(User).filter(User.nickname == nick)
+                    draft_message.receiver_id = receiver_id.first().id
+                draft_message.body=form.data['body']
                 if form.data['delivery_date'] is None:
-                    new_message.delivery_date=date.today()
-
-                new_message.creation_date=date.today()
-                sender= db.session.query(User).filter(User.id == current_user.id)
-                new_message.sender_id=sender.first().id
-                new_message.opened = False
-                new_message.deleted = False
-                _blacklist_control=db.session.query(BlackList).filter(BlackList.user_id==new_message.receiver_id).filter(BlackList.blacklisted_user_id==new_message.sender_id)
+                        draft_message.delivery_date=date.today()
+                else:
+                    draft_message.delivery_date=form.data['delivery_date']
+                #Does the creation date should be updated?
+                draft_message.creation_date=date.today()
+                _blacklist_control=db.session.query(BlackList).filter(BlackList.user_id==draft_message.receiver_id).filter(BlackList.blacklisted_user_id==draft_message.sender_id)
                 if _blacklist_control.first() is not None:
                     #TODO add visula advice
                     print("blacklist rilevata")
                 else:
-                    db.session.add(new_message)
+                    draft_message.image= image_binary.decode('utf-8')
+                    db.session.add(draft_message)
+            elif request.form['submit_button'] == "Save changes":
+                draft_message=db.session.query(Message).filter(Message.message_id==draft_id).first()
+                for nick in form.data['recipient']:
+                    receiver_id = db.session.query(User).filter(User.nickname == nick)
+                    draft_message.receiver_id = receiver_id.first().id
+                    draft_message.body=form.data['body']
+                    if form.data['delivery_date'] is None:
+                        draft_message.delivery_date=date.today()
+                    else:
+                        draft_message.delivery_date=form.data['delivery_date']
+                    draft_message.image= image_binary.decode('utf-8')
+                    db.session.add(draft_message)
             db.session.commit()
             q = db.session.query(User).filter(User.id == current_user.id)
             #TODO blacklist
@@ -145,14 +185,9 @@ def send():
             return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS, is_submitted=True)
         
     elif request.method == 'GET':
-        if draftBody is not None:
-            form.body.data=draftBody
-            print('sono qui')
-            if (isReply is not None and isReply) and (draftReciever is not None):
-                if draftReciever is not None:
-                    form.body.data=str(draftReciever)+' wrote:\n'+str(draftBody)+'\n-----------------\n'
         if current_user is not None and hasattr(current_user, 'id'):
-            #TODO blacklist
+            form.body.data=draftBody
+            print('Sono vivo')
             user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)
             new_user_list=[]
             for elem in user_list.all():
@@ -160,10 +195,21 @@ def send():
             dictUS = {}
             for el in new_user_list:
                 dictUS[el] = 0
-            if draftReciever is not None:
-                dictUS[draftReciever] = 1
+
+            if (isReply is not None and isReply) and (draftReciever is not None):
+                if draftReciever is not None:
+                    form.body.data=str(draftReciever)+' wrote:\n'+str(draftBody)+'\n-----------------\n'
+
+            #TODO blacklist
+            if draft_id is not None:
+                draft_message=db.session.query(Message).filter(Message.message_id==draft_id).first()
+                form.body.data=draft_message.body
+                form.delivery_date.data=draft_message.delivery_date
+                #form.recipient=db.session.query(User).filter(User.id==draft_message.receiver_id).first().nickname
+                dictUS[db.session.query(User).filter(User.id==draft_message.receiver_id).first().nickname] = 1
+
             q = db.session.query(User).filter(User.id == current_user.id)
-            return render_template("send.html", current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS)
+            return render_template("send.html", current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS, draft_id=draft_id)
         else:
             welcome = None
             return redirect('/login')
@@ -178,14 +224,12 @@ def profile():
         'home' page
     """
     if current_user is not None and hasattr(current_user, 'id'):
-
         if request.method == 'GET':
             user_filter_list = db.session.query(Filter_list).filter(Filter_list.user_id==current_user.id)
             if user_filter_list.first() is not None:
                 return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
             else:
                 return render_template("profile_info.html", current_user=current_user,user_filter_list="")
-
         elif request.method == 'POST':
             if 'filter' in request.form:
                 print("change filter branch")
@@ -312,18 +356,42 @@ def message_view(id):
             else:
                 return 'You can\'t delete this message!'
         else:
-            query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id).filter(Message.deleted==False)
+            #Received messages
+            query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.deleted==False)
             if query.first() != None:
                 message=query.first()
-                if (not message[0].receiver_id == current_user.id) or (message[0].delivery_date>datetime.datetime.today()):
-                    return 'You can\'t read this message!'
-                else:
+                if message[0].receiver_id == current_user.id and message[0].delivery_date<=datetime.datetime.today():
                     if not message[0].opened:
                         message[0].opened = True
                         db.session.commit()
-                    return render_template('message.html', message=message)
+                    return render_template('message.html', message=message, mode='received')
+            
+            #Sent messages (DON'T FILTER FOR DELETED MESSAGES OTHERWISE THE SENDER KNOWS THAT THE MESSAGE IS DELETED BY THE RECIPIENT)
+            query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
+            if query.first() != None:
+                message=query.first()
+                if message[0].sender_id == current_user.id:
+                    return render_template('message.html', message=message, mode='sent')
             else:
-                return 'You can\'t read this message!'
+            	return 'You can\'t read this message!'
+    else:
+        return redirect('/login')
+
+@users.route('/calendar')
+def calendar():
+    if current_user is not None and hasattr(current_user, 'id'):
+        _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
+        _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today()).filter(Message.deleted==False)
+
+        events = []
+
+        for message in _sentMessages:
+            events.append({'todo' : "Sent: " + str(message[1].nickname), 'date' : str(message[0].delivery_date), 'msgID' : str(message[0].message_id)})
+
+        for message in _recMessages:
+            events.append({'todo' : "Received: " + str(message[1].nickname), 'date' : str(message[0].delivery_date), 'msgID' : str(message[0].message_id)})
+
+        return render_template('calendar.html', events = events)
     else:
         return redirect('/login')
 
