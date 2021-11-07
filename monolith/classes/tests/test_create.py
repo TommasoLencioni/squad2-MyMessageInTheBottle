@@ -54,7 +54,7 @@ class TestCreate:
                 'lastname': 'last',
                 'password': 'pass',
                 'date_of_birth': '1/01/2000',
-                'nickname': 'nick',
+                'nickname': 'nick5',
                 'location': 'Pisa'
             }
             session = requests.session()

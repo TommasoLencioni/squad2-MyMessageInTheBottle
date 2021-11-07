@@ -8,7 +8,7 @@ LOGIN_OK = 200
 LOGIN_FAIL = 201
 DOUBLE_LOGIN = 202
 
-class TestCreate:
+class TestCreate_login:
 
 #1) login
     def test_login_user(self):
@@ -46,6 +46,7 @@ class TestCreate:
                 'password': 'pass5'
             }
             session = requests.session()
-            r = requests.post(URL, data=payload)
-            r = requests.post(URL)
+            r1 = requests.post(URL, data=payload)
+            loginCookies = r1.cookies
+            r = requests.post(URL, cookies=loginCookies, data=payload)
             assert r.status_code == DOUBLE_LOGIN

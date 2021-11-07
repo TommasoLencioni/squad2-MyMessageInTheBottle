@@ -34,29 +34,29 @@ def _users():
             if request.args.get("block") == "1":
                 _list = db.session.query(BlackList).filter(BlackList.user_id==new_blackList.user_id).filter(BlackList.blacklisted_user_id==new_blackList.blacklisted_user_id)
                 if _list.first() is not None:
-                    print("già in blacklist")
+                    print("blacklist already exist")
                 else:
                     db.session.add(new_blackList)
                     db.session.commit()
-                    print("inserimento blacklist")
+                    print("blacklist add")
             elif request.args.get("block") == "0":
                 blacklist_id = db.session.query(BlackList).filter(BlackList.user_id==new_blackList.user_id).filter(BlackList.blacklisted_user_id==new_blackList.blacklisted_user_id)
                 if blacklist_id.first() is not None:
                     db.session.query(BlackList).filter(BlackList.id==blacklist_id.first().id).delete()
                     db.session.commit()
-                    print("rimozione blacklist")
+                    print("blacklist remove")
                 else:
-                    print("utente non in blacklist")
+                    print("blacklist not exist")
             else:
                 new_reportlist.user_id = current_user.id
                 new_reportlist.reportlisted_user_id = request.args.get("block_user_id")
                 _list = db.session.query(ReportList).filter(ReportList.user_id==new_reportlist.user_id).filter(ReportList.reportlisted_user_id==new_reportlist.reportlisted_user_id)
                 if _list.first() is not None:
-                    print("già segnalato")
+                    print("reportlist already exist")
                 else:
                     db.session.add(new_reportlist)
                     db.session.commit()
-                    print("inserimento reportlist")
+                    print("reportlist add")
         _users = db.session.query(User).filter(User.is_deleted==False).filter(User.id!=current_user.id)
         return render_template("users.html", users=_users)
     else:
@@ -170,9 +170,7 @@ def send():
                     db.session.add(draft_message)
             db.session.commit()
             q = db.session.query(User).filter(User.id == current_user.id)
-            #TODO blacklist
             user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)
-            #print(user_list.all())
             new_user_list=[]
             for elem in user_list.all():
                 new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
