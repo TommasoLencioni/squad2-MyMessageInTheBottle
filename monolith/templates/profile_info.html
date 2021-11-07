@@ -10,7 +10,7 @@
       <h5> location : </h5> {{ current_user.location }}
       <h5> nickname : </h5> {{ current_user.nickname }}
       <h5>points: </h5> {{current_user.lottery_points}}
-      {% if current_user.lottery_points > 0 %}
+      {% if current_user.lottery_points >= 12 %}
             <input type=submit name="submit_button" value='withdraw_message' onclick='
                   window.location.href = `/mailbox?lottery=1`;' />
       {% endif %}

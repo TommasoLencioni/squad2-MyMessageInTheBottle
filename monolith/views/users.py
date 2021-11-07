@@ -19,7 +19,7 @@ from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
 from random import randint
 
-POINT_NECESSARY = 1
+POINT_NECESSARY = 12
 
 users = Blueprint('users', __name__)
 

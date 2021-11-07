@@ -85,7 +85,7 @@ def setup_periodic_tasks(sender, **kwargs):
 
     # LOTTERY: Executes every month
     sender.add_periodic_task(
-        crontab(hour=15, minute=20, day_of_month='5'), lottery.s())
+        crontab(hour=11, minute=00, day_of_month='1'), lottery.s())
 
 def send_mail(email, body):
     print ("sending_mail...")
