@@ -67,29 +67,26 @@ def create_user():
     form = UserForm()
     if not (current_user is not None and hasattr(current_user, 'id')):
         if request.method == 'POST':
-            if form.validate_on_submit():
-                email_exist_control = db.session.query(User).filter(User.email==form.email.data)
-                if email_exist_control.first() is not None:
-                    #return render_template('create_user.html', form=form)
-                    flash("This email is already registered, please try another!")
-                    return redirect("/create_user")
-                nick_exist_control = db.session.query(User).filter(User.nickname==form.nickname.data)
-                if nick_exist_control.first() is not None:
-                    flash("This nickname is not available, please try another!")
-                    return redirect("/create_user")
-                new_user = User()
-                form.populate_obj(new_user)
-                """
-                Password should be hashed with some salt. For example if you choose a hash function x, 
-                where x is in [md5, sha1, bcrypt], the hashed_password should be = x(password + s) where
-                s is a secret key.
-                """
-                new_user.set_password(form.password.data)
-                db.session.add(new_user)
-                db.session.commit()
-                return redirect('/users')
-            else:
-                return render_template('create_user.html', form=form, fail_date=True)
+            email_exist_control = db.session.query(User).filter(User.email==form.email.data)
+            if email_exist_control.first() is not None:
+                #return render_template('create_user.html', form=form)
+                flash("This email is already registered, please try another!")
+                return redirect("/create_user")
+            nick_exist_control = db.session.query(User).filter(User.nickname==form.nickname.data)
+            if nick_exist_control.first() is not None:
+                flash("This nickname is not available, please try another!")
+                return redirect("/create_user")
+            new_user = User()
+            form.populate_obj(new_user)
+            """
+            Password should be hashed with some salt. For example if you choose a hash function x, 
+            where x is in [md5, sha1, bcrypt], the hashed_password should be = x(password + s) where
+            s is a secret key.
+            """
+            new_user.set_password(form.password.data)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect('/users')
         elif request.method == 'GET':
             return render_template('create_user.html', form=form)
         else:
@@ -184,7 +181,6 @@ def send():
     elif request.method == 'GET':
         if current_user is not None and hasattr(current_user, 'id'):
             form.body.data=draftBody
-            print('Sono vivo')
             user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)
             new_user_list=[]
             for elem in user_list.all():
