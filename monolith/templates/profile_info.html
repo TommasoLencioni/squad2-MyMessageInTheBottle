@@ -1,44 +1,82 @@
 {% extends "base.html" %}
 {% block title %}Profile{% endblock %}
 {% block content %}
-      <br>
-      <h2>Info</h2>
-      <h5> firstname : </h5> {{ current_user.firstname }}
-      <h5> surname : </h5>  {{ current_user.lastname }}
-      <h5> email : </h5> {{ current_user.email }}
-      <h5> birthday : </h5> {{ current_user.date_of_birth }}
-      <h5> location : </h5> {{ current_user.location }}
-      <h5> nickname : </h5> {{ current_user.nickname }}
-      <br><br><br>
-      <h2>Change Info:</h2>
-      <form action="" method="POST" name="change_info">
-            <h5> firstname : </h5>
-            <input type="text" id="firstname" name="firstname" value="{{current_user.firstname}}">
-            <h5> surname : </h5>
-            <input type="text" id="lastname" name="surname" value="{{current_user.lastname}}">
-            <h5> birthday : </h5>
-            <input type="text" id="birthday" format="%d/%m/%Y" name="birthday" value="{{current_user.date_of_birth}}">
-            <h5> location : </h5>
-            <input type="text" id="location" name="location" value="{{current_user.location}}">
-            <h5> new password: </h5>
-            <input type="text" id="new_password" name="new_password" value="">
-            <br><br>
-            <h5> Insert the password to confirm changes: </h5>
-            <p> (The old one if you are changing it) </p>
-            <input type="text" id="old_password" name="old_password" value="">
-            <input type="submit" value="Save changes">
-      </form>
-      <form action="" method="POST" name="filter">
-            <br>
-            <br>
-            <h2>Word filter:</h2>
-            <h5>(insert words separated by commas)</h5>
-            <input type="text" id="filter" name="filter" value="{{user_filter_list}}">
-            <br>
-            <br>
-            <input type="submit" value="Submit">
-      </form>
+
+<div class="row">
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body" style="margin-left: 60px;">
+            <div class="card-header"><h1>Profile Info:</h1></div>
+            <div style="padding: 40px; margin-bottom: 57px;">
+                  <table style="width:100%">
+                        <tr>
+                          <th>Name:</th>
+                          <td>{{ current_user.firstname }}</td>
+                        </tr>
+                        <tr>
+                          <th>Surname:</th>
+                          <td>{{ current_user.lastname }}</td>
+                        </tr>
+                        <tr>
+                          <th>Email:</th>
+                          <td>{{ current_user.email }}</td>
+                        </tr>
+                        <tr>
+                          <th>Birthday:</th>
+                          <td>{{ current_user.date_of_birth }}</td>
+                        </tr>
+                        <tr>
+                          <th>Location:</th>
+                          <td>{{ current_user.location }}</td>
+                        </tr>
+                        <tr>
+                          <th>Nickname:</th>
+                          <td>{{ current_user.nickname }}</td>
+                        </tr>                      
+                  </table>
+                  <form action="" method="POST" name="filter">
+                        <br>
+                        <br>
+                        <h2>Word filter:</h2>
+                        <h5>(insert words separated by commas)</h5>
+                        <input type="text" id="filter" name="filter" value="{{user_filter_list}}">
+                        <br>
+                        <br>
+                        <input type="submit" class="btn btn-primary" value="Submit">
+                        <br>
+                        <br>
+                        <br>
+                  </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            <div class="card-header"><h1>Change Info:</h1></div>
+            <form action="" method="POST" name="change_info">
+                  <div style="padding: 40px;">
+                        <h5> firstname : </h5>
+                        <input type="text" id="firstname" name="firstname" value="{{current_user.firstname}}">
+                        <h5> surname : </h5>
+                        <input type="text" id="lastname" name="surname" value="{{current_user.lastname}}">
+                        <h5> birthday : </h5>
+                        <input type="text" id="birthday" format="%d/%m/%Y" name="birthday" value="{{current_user.date_of_birth}}">
+                        <h5> location : </h5>
+                        <input type="text" id="location" name="location" value="{{current_user.location}}">
+                        <h5> new password: </h5>
+                        <input type="text" id="new_password" name="new_password" value="">
+                        <br><br>
+                        <h5> Insert the password to confirm changes: </h5>
+                        <p> (The old one if you are changing it) </p>
+                        <input type="text" id="old_password" name="old_password" value="">
+                        <input type="submit" class="btn btn-success" value="Save changes">
+                  </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
 {% endblock %}
-
-
-
