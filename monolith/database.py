@@ -13,7 +13,7 @@ class User(db.Model):
     firstname = db.Column(db.Unicode(128))
     lastname = db.Column(db.Unicode(128))
     password = db.Column(db.Unicode(128))
-    date_of_birth = db.Column(db.DateTime)
+    date_of_birth = db.Column(db.Date)
     location = db.Column(db.Unicode(128))
     nickname = db.Column(db.Unicode(128))
     propic = db.Column(db.Unicode(128))
@@ -51,9 +51,9 @@ class Message(db.Model):
     message_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     sender_id = db.Column(db.Integer, nullable=False)
     receiver_id = db.Column(db.Integer, nullable=False)
-    delivery_date = db.Column(db.DateTime)
+    delivery_date = db.Column(db.Date)
     
-    creation_date = db.Column(db.DateTime)                                  # create_date for the message
+    creation_date = db.Column(db.Date)                                  # create_date for the message
     body = db.Column(db.Unicode(128), nullable=True)                        # body of the message
     is_delivered = db.Column(db.Boolean, nullable=False, default = False)   # True when a notification is send to the recipient for advise him that ricived new message
     is_draft = db.Column(db.Boolean, nullable=True)                         # when a message is not send, but saved as draft
