@@ -3,60 +3,76 @@
 {% block content %}
 <html>
     <body>
-        {% if draft_id %}
-        <h1>Edit the draft</h1>
-        {% else %}
-        <h1>Write a message</h1>
-        {% endif %}
-            
-            <!--<h2>{{current_user_firstname}}</h2>-->
-            <form enctype = "multipart/form-data" action="" method="POST">
-                {{ form.hidden_tag() }}
-                <dl>
-                <p>Recipient</p>
-                {% if draft_id %}
-                <select name="recipient" onChange="changeSizeInput()" id="recipient">
-                {% else %}
-                <select name="recipient" onChange="changeSizeInput()" multiple id="recipient">
-                {% endif %}
-                    {% for user in user_list.keys() %}
-                        {% if user_list[user] == 1 %}
-                            <option selected="selected" value="{{user}}">{{user}} </option>
-                        {%else%}
-                        <option value="{{user}}">{{user}} </option>
+        <div class="container">
+            <div class="d-flex justify-content-center h-70">
+                <div class="card text-center">
+                    <div class="card-header">
+                        {% if draft_id %}
+                        <h2>Edit the draft</h2>
+                        {% else %}
+                        <h2>Write a message</h2>
                         {% endif %}
-                    {% endfor %}
-                </select>
-                {% for field in form.display %}
-                  <dt>{{ form[field].label }}</dt>
-                  <dd>{{ form[field]() }}</dd>
-                  {% if form[field].errors %}
-                      {% for e in form[field].errors %}
-                      <p class="help-block">{{ e }}</p>
-                      {% endfor %}
-                  {% endif %}
-                {% endfor %}
-                </dl>
-                <p>File: <input type=file value="image_file" name="image_file"/></p>
-                {% if draft_id %}
-                    <input type=submit name="submit_button" value="Save changes" style="height:40px; width:150px">
-                    <input type=submit name="submit_button" value="Send as message" style="height:40px; width:150px">
-                {% else %}
-                    <input type=submit name="submit_button" value="Save as draft" style="height:40px; width:150px">
-                    <input type=submit name="submit_button" value="Send" style="height:40px; width:150px">
-                {% endif %}
-            </form>
-            {% if is_submitted %}
-            <script>    
-                window.setTimeout(function(){
-                window.location.href = "/mailbox";
-        
-                }, 0);
-            </script>
-            {% endif %}
-            {% if none_recipient %}
-                <h1>The recipient is empty!</h1>
-            {% endif %}
+                    </div>
+                    <div class="card-body">
+                    <h5 class="card-title">Recipient</h5>
+                    <!--<h2>{{current_user_firstname}}</h2>-->
+                    <form enctype = "multipart/form-data" action="" method="POST">
+                        {{ form.hidden_tag() }}
+                        <dl>
+                        {% if draft_id %}
+                        <select name="recipient" onChange="changeSizeInput()" id="recipient">
+                        {% else %}
+                        <select name="recipient" onChange="changeSizeInput()" multiple id="recipient">
+                        {% endif %}
+                            {% for user in user_list.keys() %}
+                                {% if user_list[user] == 1 %}
+                                    <option selected="selected" value="{{user}}">{{user}} </option>
+                                {%else%}
+                                <option value="{{user}}">{{user}} </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        {% for field in form.display %}
+                        <div style="padding: 20px;">
+                            <h5>{{ form[field].label }}</h5>
+                            <dd>{{ form[field]() }}</dd>
+                            {% if form[field].errors %}
+                                {% for e in form[field].errors %}
+                                <p class="help-block">{{ e }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        </dl>
+                        <div style="padding: 20px; margin-left: 160px;">
+                            <p>File: <input type=file value="image_file" name="image_file"/></p>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted" style="margin-bottom: 10px;">
+                        {% if draft_id %}
+                        <input type=submit name="submit_button" value="Save changes" class="btn btn-success" style="margin-top : 10px; margin-right: 5px;">
+                        <input type=submit name="submit_button" value="Send as message" class="btn btn-success" style="margin-top : 10px; margin-left: 5px;">
+                        {% else %}
+                            <input type=submit name="submit_button" value="Save as draft" class="btn btn-success" style="margin-top : 10px; margin-right: 5px;">
+                            <input type=submit name="submit_button" value="Send" class="btn btn-success" style="margin-top : 10px; margin-left: 5px;">
+                        {% endif %}
+                        </form>
+                        {% if is_submitted %}
+                        <script>    
+                            window.setTimeout(function(){
+                            window.location.href = "/mailbox";
+                    
+                            }, 0);
+                        </script>
+                        {% endif %}
+                        {% if none_recipient %}
+                            <h1>The recipient is empty!</h1>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+            
     </body>
 </html>
 {% endblock %}

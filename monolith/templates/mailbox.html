@@ -2,9 +2,10 @@
 {% block title %}Mailbox{% endblock %}
 {% block content %}
 
-<h1>My Message in a Bottle</h1>
 {% if current_user.is_authenticated %}
-  <h3>Hi {{ current_user.firstname }}! This is your mailbox!</h3>
+<div class="alert alert-success" role="alert">
+    Hi {{ current_user.firstname }}! This is your mailbox!
+</div>
 
 <html>
     <head>
@@ -12,13 +13,6 @@
         <style>
         * {
         box-sizing: border-box;
-        }
-
-        /* Create three equal columns that floats next to each other */
-        .column {
-        float: left;
-        width: 25%;
-        padding: 10px;
         }
 
         /* Clear floats after the columns */
@@ -29,14 +23,26 @@
         }
 
         #div2{display: none;}
+        
         #div3{display: none;}
+
+        .div_hover { background-color: #ccc }
+
+        .div_hover:hover { background-color: rgba(0, 132, 255, 0.514);}
+
+        .a_hover { background-color: rgba(0, 255, 42, 0.521); }
+
+        .a_hover:hover { background-color: rgb(0, 255, 42); }
+
         </style>
     </head>
     <body>
-        <button class="btn btn-primary" onclick="ShowInbox()">Inbox</button>
-        <button class="btn btn-primary" onclick="ShowSent()">Sent</button>
-        <button class="btn btn-primary" onclick="ShowDraft()">Draft</button>
-
+        <div style="margin-left: 30px;">
+            <button class="btn btn-primary" onclick="ShowInbox()">Inbox</button>
+            <button class="btn btn-primary" onclick="ShowSent()">Sent</button>
+            <button class="btn btn-primary" onclick="ShowDraft()">Draft</button>
+        </div>
+        
         <script type="text/javascript">
             function ShowInbox() {
                 document.getElementById('div1').style.display = "block";
@@ -57,7 +63,6 @@
 
         <div class="container p-0" id="div1">
             <h1 class="h3 mt-3 mb-3">Inbox</h1>
-
             <div class="px-4 d-none d-md-block">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
@@ -65,180 +70,56 @@
                     </div>
                 </div>
             </div>
-
             <div class="row">
-                <div style="width: 16%; float: left; padding: 10px;">
-                    <h2 class="h3 mt-3 mb-3">Sender</h2>
-                    {% for message in messages: %}
-                        <a class="list-group-item list-group-item-iSender border-1" style="background-color:#ccc;">
-                            <div class="d-flex align-items-start">
-                                <div class="flex-grow-1 ml-3">
-                                    {{message[1].nickname}}
-                                </div>
-                            </div>
-                        </a>
-                    {% endfor %}
-                </div>
-
-                <div style="width: 17%; float: left; padding: 10px;">
-                    <h2 class="h3 mt-3 mb-3">Delivery date</h2>
-                    {% for message in messages: %}
-                        <a class="list-group-item list-group-item-iD border-1" style="background-color:#ccc;">
-                            <div class="d-flex align-items-start">
-                                <div class="flex-grow-1 ml-3">
-                                    {{message[0].delivery_date}}
-                                </div>
-                            </div>
-                        </a>
-                    {% endfor %}
-                </div>
-
-                <div style="width: 30%; float: left; padding: 10px;">
-                    <h2 class="h3 mt-3 mb-3">Body</h2>
+                <h3 style="margin-left: 10px;">Sender</h3>
+                <h3 style="margin-left: 60px;">Date</h3>
+                <h3 style="margin-left: 147px;">Body</h3>
+            </div>
+            <div class="row">
+                <div style="width: 99%; float: left; padding: 10px; overflow: hidden;">
                     {% for message in messages: %}
                         {% if not message[0].opened %}
-                            <a class="list-group-item list-group-item-iB border-1" style="background-color:rgb(255, 0, 0);">
+                            <a onclick='window.location.href = `/message/{{message[0].message_id}}`;' class="list-group-item list-group-item-sR border-1 a_hover">
                         {% else %}
-                            <a class="list-group-item list-group-item-iB border-1" style="background-color:#ccc;">
+                            <a onclick='window.location.href = `/message/{{message[0].message_id}}`;' class="list-group-item list-group-item-sR border-1 div_hover">
                         {% endif %}
-                            <div class="d-flex align-items-start">
-                                <div class="flex-grow-1 ml-3">
-                                    {{message[0].body}}
-                                    <figure id="imageResult" style="display: block;" class="image"> 
-                                        <img id="base64ImageForDisplay" alt="" src="data:image/png;base64,{{message[0].image}}" style="display: block;">
-                                    </figure>
-                                </div>
-                            </div>
-                        </a>
-                    {% endfor %}
-                </div>
-                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
-                    <h2 class="h4 mt-4 mb-4"></h2>
-                    {% for message in messages: %}
-                        <div class="d-flex align-items-start">
+                        <div class="row" class="row" style="float: right; margin-right: 1px;">
                             <div class="flex-grow-1 ml-3">
-                                <input style="margin-top:2px; margin-bottom: 7px;" type='button' class="btn btn-success" value='Forward' onclick='
+                                <input style="margin-top:2px; margin-bottom: 7px;" type='button' class="btn btn-info" value='Forward' onclick='
                                     window.location.href = `/send?body={{message[0].body}}`;' />
                             </div>
-                        </div>
-                    {% endfor %}
-                </div>
-                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
-                    <h2 class="h4 mt-4 mb-4"></h2>
-                    {% for message in messages: %}
-                        <div class="d-flex align-items-start">
                             <div class="flex-grow-1 ml-3">
                                 <input style="margin-top:2px; margin-bottom: 7px; margin-left: 10px;" type='button' class="btn btn-success" value='Reply' onclick='
                                     window.location.href = `/send?reciever={{message[1].nickname}}&body={{message[0].body}}&reply=True`;' />
                             </div>
-                        </div>
-                    {% endfor %}
-                </div>
-                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
-                    <h2 class="h4 mt-4 mb-4"></h2>
-                    {% for message in messages: %}
-                        <div class="d-flex align-items-start">
                             <div class="flex-grow-1 ml-3">
-                                <input style="margin-top:2px; margin-bottom: 7px; margin-left: 10px;" type='button' class="btn btn-success" value='Open' onclick='
-                                    window.location.href = `/message/{{message[0].message_id}}`;' />
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
-                    <h2 class="h4 mt-4 mb-4"></h2>
-                    {% for message in messages: %}
-                        <div class="d-flex align-items-start">
-                            <div class="flex-grow-1 ml-3">
-                                <input style="margin-top:2px; margin-bottom: 7px; margin-left: 10px;" type='button' class="btn btn-success" value='Delete' onclick='
+                                <input style="margin-top:2px; margin-bottom: 7px; margin-left: 10px;" type='button' class="btn btn-danger" value='Delete' onclick='
                                     window.location.href = `/message/{{message[0].message_id}}?delete=True`;' />
                             </div>
                         </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <div class="container p-0" id="div2">
-            <h1 class="h3 mt-3 mb-3">Sent</h1>
-
-            <div class="px-4 d-none d-md-block">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <input type="text" class="form-control my-3" placeholder="Search...">
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div style="width: 16%; float: left; padding: 10px;">
-                    <h2 class="h3 mt-3 mb-3">Reciever</h2>
-                    {% for message in sendMessages: %}
-                        <a class="list-group-item list-group-item-sR border-1" style="background-color:#ccc;">
+                        <div class="row">
                             <div class="d-flex align-items-start">
-                                <div class="flex-grow-1 ml-3">
+                                <div>
                                     {{message[1].nickname}}
                                 </div>
-                            </div>
-                        </a>
-                    {% endfor %}
-                </div>
-
-                <div style="width: 17%; float: left; padding: 10px;">
-                    <h2 class="h3 mt-3 mb-3">Delivery date</h2>
-                    {% for message in sendMessages: %}
-                        <a class="list-group-item list-group-item-sD border-1" style="background-color:#ccc;">
-                            <div class="d-flex align-items-start">
-                                <div class="flex-grow-1 ml-3">
+                                <div style="margin-left: 100px;">
                                     {{message[0].delivery_date}}
                                 </div>
-                            </div>
-                        </a>
-                    {% endfor %}
-                </div>
-                <div style="width: 40%; float: left; padding: 10px;">
-                    <h2 class="h3 mt-3 mb-3">Body</h2>
-                    {% for message in sendMessages: %}
-                        <a class="list-group-item list-group-item-sB border-1" style="background-color:#ccc;">
-                            <div class="d-flex align-items-start">
-                                <div class="flex-grow-1 ml-3">
+                                <div style="margin-left: 50px; max-width: 200px; max-height: 200px; overflow: hidden;">
                                     {{message[0].body}}
                                     <figure id="imageResult" style="display: block;" class="image"> 
                                         <img id="base64ImageForDisplay" alt="" src="data:image/png;base64,{{message[0].image}}" style="display: block;">
                                     </figure>
                                 </div>
                             </div>
-                        </a>
-                    {% endfor %}
-                </div>
-                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
-                    <h2 class="h4 mt-4 mb-4"></h2>
-                    {% for message in sendMessages: %}
-                        <div class="d-flex align-items-start">
-                            <div class="flex-grow-1 ml-3">
-                                <input style="margin-top:2px; margin-bottom: 7px; margin-left: 10px;" type='button' class="btn btn-success" value='Open' onclick='
-                                    window.location.href = `/message/{{message[0].message_id}}`;' />
-                            </div>
                         </div>
-                    {% endfor %}
-                </div>
-                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
-                    <h2 class="h4 mt-4 mb-4"></h2>
-                    {% for message in sendMessages: %}
-                        <div class="d-flex align-items-start">
-                            <div class="flex-grow-1 ml-3">
-                                <input style="margin-top:2px; margin-bottom: 7px;" type='button' class="btn btn-success" value='Forward' onclick='
-                                    window.location.href = `/send?body={{message[0].body}}`;' />
-                            </div>
-                        </div>
+                    </a>
                     {% endfor %}
                 </div>
             </div>
         </div>
-
-        <div class="container p-0" id="div3">
-            <h1 class="h3 mt-3 mb-3">Draft</h1>
-
+        <div class="container p-0" id="div2">
+            <h1 class="h3 mt-3 mb-3">Sent Messages</h1>
             <div class="px-4 d-none d-md-block">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
@@ -246,27 +127,30 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <h3 style="margin-left: 10px;">Reciever</h3>
+                <h3 style="margin-left: 50px;">Date</h3>
+                <h3 style="margin-left: 130px;">Body</h3>
+            </div>
 
             <div class="row">
-                <div style="width: 16%; float: left; padding: 10px;">
-                    <h2 class="h3 mt-3 mb-3">Reciever</h2>
-                    {% for message in draftMessages: %}
-                        <a class="list-group-item list-group-item-dR border-1" style="background-color:#ccc;">
-                            <div class="d-flex align-items-start">
-                                <div class="flex-grow-1 ml-3">
-                                    {{message[1].nickname}}
+                <div style="width: 99%; float: left; padding: 10px; overflow: hidden;">
+                    {% for message in sendMessages: %}
+                        <a onclick='window.location.href = `/message/{{message[0].message_id}}`;' class="list-group-item list-group-item-sR border-1 div_hover">
+                            <div class="row" style="float: right; margin-right: 1px;">
+                                <div>
+                                    <input style="margin-left: 10px;" type='button' class="btn btn-info" value='Forward' onclick='
+                                        window.location.href = `/send?body={{message[0].body}}`;' />
                                 </div>
                             </div>
-                        </a>
-                    {% endfor %}
-                </div>
-
-                <div style="width: 77%; float: left; padding: 10px;">
-                    <h2 class="h3 mt-3 mb-3">Body</h2>
-                    {% for message in draftMessages: %}
-                        <a class="list-group-item list-group-item-dB border-1" style="background-color:#ccc;">
-                            <div class="d-flex align-items-start">
-                                <div id ="ID1" class="flex-grow-dB ml-3">
+                            <div class="row">
+                                <div>
+                                    {{message[1].nickname}}
+                                </div>
+                                <div style="margin-left: 100px;">
+                                    {{message[0].delivery_date}}
+                                </div>
+                                <div style="margin-left: 50px; max-width: 200px; max-height: 200px; overflow: hidden;">
                                     {{message[0].body}}
                                     <figure id="imageResult" style="display: block;" class="image"> 
                                         <img id="base64ImageForDisplay" alt="" src="data:image/png;base64,{{message[0].image}}" style="display: block;">
@@ -276,22 +160,43 @@
                         </a>
                     {% endfor %}
                 </div>
-
-                <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
-                    <h2 class="h4 mt-4 mb-4"></h2>
+            </div>
+        </div>
+        <div class="container p-0" id="div3">
+            <h1 class="h3 mt-3 mb-3">Draft</h1>
+            <div class="px-4 d-none d-md-block">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <input type="text" class="form-control my-3" placeholder="Search...">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div style="width: 99%; float: left; padding: 10px;">
                     {% for message in draftMessages: %}
-                        <div class="d-flex align-items-start">
-                            <div class="flex-grow-1 ml-3">
-                                <input style="margin-top:2px; margin-bottom: 7px;" class="btn btn-danger" type='button' value='Edit' onclick='
-                                    window.location.href = `/send?draft_id={{message[0].message_id}}`;' />
-                                <!-- <button style="margin-top:10px; margin-bottom: 10px;" onclick="redirtectPage()">Edit</button> -->
+                        <a class="list-group-item list-group-item-sR border-1" style="background-color:#ccc;">
+                            <div class="row" style="float: right; margin-right: 1px;">
+                                <div>
+                                    <input style="margin-top:2px; margin-bottom: 7px;" class="btn btn-danger" type='button' value='Edit' onclick='
+                                        window.location.href = `/send?draft_id={{message[0].message_id}}`;' />
+                                </div>
                             </div>
-                        </div>
+                            <div class="row">
+                                <div>
+                                    {{message[1].nickname}}
+                                </div>
+                                <div id ="ID1"style="margin-left: 50px; max-width: 200px; max-height: 200px; overflow: hidden;">
+                                    {{message[0].body}}
+                                    <figure id="imageResult" style="display: block;" class="image"> 
+                                        <img id="base64ImageForDisplay" alt="" src="data:image/png;base64,{{message[0].image}}" style="display: block;">
+                                    </figure>
+                                </div>
+                            </div>    
+                        </a>
                     {% endfor %}
                 </div>
             </div>
         </div>
-
     {% else %}
 Hi Anonymous, <a href="/login">log in</a> or <a href="/create_user">create an account</a>
 {% endif %}

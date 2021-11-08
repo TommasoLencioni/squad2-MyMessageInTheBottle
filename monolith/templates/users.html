@@ -4,56 +4,57 @@
 
 <html>
   <body>
-
-
-    <!-- <main class="content"> -->
       <div class="container">
+        <h1 class="h3 mb-3 mt-3">Users List</h1>
   
-          <h1 class="h3 mb-3 mt-3">Users List</h1>
-  
-          <!-- <div class="card"> -->
-              <!-- <div class="row g-0"> -->
-                  <!-- <div class="col-12 col-lg-5 col-xl-3 align-items-center"> -->
-  
-                      <div class="px-4 d-none d-md-block">
-                          <div class="d-flex align-items-center">
-                              <div class="flex-grow-1">
-                                  <input type="text" class="form-control my-3" placeholder="Search...">
-                              </div>
-                          </div>
-                      </div>
-  
-                      {% for user in users: %}
-                      <a href="/" class="list-group-item list-group-item-action border-0">
-                          <div class="d-flex align-items-start">
-                              <div class="flex-grow-1 ml-3">
-                                {{user.firstname}} {{user.lastname}}
-                                {% if user.is_active: %}
-                                  <div class="small"><span class="fas fa-circle chat-online"> Online</span></div>
-                                {% else: %}
-                                  <div class="small"><span class="fas fa-circle chat-online"> Offline</span></div>
-                                {% endif %}
-                                </div>
-                          </div>
-                      </a>
+          <div class="px-4 d-none d-md-block">
+              <div class="d-flex align-items-center">
+                  <div class="flex-grow-1">
+                      <input type="text" class="form-control my-3" placeholder="Search...">
+                  </div>
+              </div>
+          </div>
+
+          <div class="row">
+
+            {% for user in users: %}
+              <a href="/" class="list-group-item list-group-item-action border-0">
+                <!-- <div class="d-flex align-items-start"> -->
+                    <div style="float: left; margin-left: 1px;">
+                      {{user.firstname}} {{user.lastname}}
+                      {% if user.is_active: %}
+                        <div class="small"><span class="fas fa-circle chat-online"> Online</span></div>
+                      {% else: %}
+                        <div class="small"><span class="fas fa-circle chat-online"> Offline</span></div>
+                      {% endif %}
+                    </div>
+                    <div style="float: right; margin-right: 1px;">
                       {% if user.id != 1 %}
-                      <input style="margin-top:10px; margin-bottom: 10px;" type='button' value='block' onclick='
+                      <input class="btn btn-danger" type='button' value='block' onclick='blockUser()
                                 window.location.href = `/users?block_user_id={{user.id}}&block=1`;' />
-                      <input style="margin-top:10px; margin-bottom: 10px;" type='button' value='free' onclick='
+                      <input class="btn btn-info" type='button' value='Unblock' onclick='unblockUser()
                                 window.location.href = `/users?block_user_id={{user.id}}&block=0`;' />
-                      <input style="margin-top:10px; margin-bottom: 10px;" type='button' value='report' onclick='
+                      <input class="btn btn-dark" type='button' value='report' onclick='reportUser();
                                 window.location.href = `/users?block_user_id={{user.id}}&block=2`;' />
                       {% endif %}
-                      {% endfor %}
-                     
-
-  
-                  <!-- </div> -->
-              <!-- </div> -->
-          <!-- </div> -->
+                    </div>
+                <!-- </div> -->
+            </a>
+            <script>
+              function blockUser() {
+                alert("User is blocked!");
+              }
+              function unblockUser() {
+                alert("User is Unblocked!");
+              }
+              function reportUser() {
+                alert("User is Reported!");
+              }
+              </script>
+            
+            {% endfor %}
+          </div>
       </div>
-  <!-- </main> -->
-
 
   </body>
 </html>
