@@ -21,6 +21,7 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     is_deleted = db.Column(db.Boolean, default=False)
     is_anonymous = False
+    lottery_points = db.Column(db.Integer, default = 0)
    # blacklist = db.Column(db.Enum(db.Integer)) #This enum contains the id of the users that this user blacklisted
     #we need to define a class Enum.
     
@@ -51,16 +52,22 @@ class Message(db.Model):
     sender_id = db.Column(db.Integer, nullable=False)
     receiver_id = db.Column(db.Integer, nullable=False)
     delivery_date = db.Column(db.DateTime)
-    creation_date = db.Column(db.DateTime)
-    is_draft = db.Column(db.Boolean, nullable=True)
-    body = db.Column(db.Unicode(128), nullable=True)
-    opened = db.Column(db.Boolean, nullable=True)
-    deleted = db.Column(db.Boolean, nullable=True)
+    
+    creation_date = db.Column(db.DateTime)                                  # create_date for the message
+    body = db.Column(db.Unicode(128), nullable=True)                        # body of the message
+    is_delivered = db.Column(db.Boolean, nullable=False, default = False)   # True when a notification is send to the recipient for advise him that ricived new message
+    is_draft = db.Column(db.Boolean, nullable=True)                         # when a message is not send, but saved as draft
+    opened = db.Column(db.Boolean, nullable=True)                           # True when the message is opened by the recipient
+    is_opened_notified = db.Column(db.Boolean, nullable=True, default = False)               # True when the notification is send for an opened message
+    deleted = db.Column(db.Boolean, nullable=True)                          # True when a message is delete
     image = db.Column(db.Unicode(1000000), nullable=True)
 
     def __init__(self, *args, **kw):
         super(Message, self).__init__(*args, **kw)
- 
+
+class Lottery(db.Model):
+    __tablename__ = 'lottery'
+    contestant_id = db.Column(db.Integer, primary_key=True)
 
 class Filter_list(db.Model):
     __tablename__ = 'filter'

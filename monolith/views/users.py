@@ -2,21 +2,24 @@ from datetime import date, datetime
 import os
 from re import I, U
 import re
+from types import MethodDescriptorType
+from flask.helpers import flash
 from sqlalchemy import select
 import time
 import datetime
-from flask import Flask, Blueprint, blueprints, redirect, render_template, request
+from flask import Flask,Blueprint, blueprints, redirect, render_template, request, abort
 from flask_login import current_user, logout_user
 from sqlalchemy.orm import query
 from werkzeug.security import check_password_hash, generate_password_hash
 import base64
 
-from monolith.database import BlackList, ReportList, User, db, Message, Filter_list
+from monolith.database import BlackList, ReportList, User, db, Message, Filter_list,Lottery
 
 from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
+from random import randint
 
-from .tasks import create_task
+POINT_NECESSARY = 12
 
 users = Blueprint('users', __name__)
 
@@ -96,6 +99,7 @@ def create_user():
 
 @users.route('/send', methods=['POST', 'GET'])
 def send():
+    isDraft =False
     draftReciever = request.args.get("reciever")
     draftBody = request.args.get("body")
     isReply = request.args.get("reply")
@@ -226,7 +230,7 @@ def profile():
                 return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
             else:
                 return render_template("profile_info.html", current_user=current_user,user_filter_list="")
-        else:
+        elif request.method == 'POST':
             if 'filter' in request.form:
                 print("change filter branch")
                 new_filter = Filter_list()
@@ -287,6 +291,28 @@ def delete_account():
 @users.route('/mailbox', methods=['GET'])
 def inbox():
     if current_user is not None and hasattr(current_user, 'id'):
+        # WITHDRAW MESSAGE (LOTTERY POINT)
+        if request.args.get("lottery") :
+            if current_user.lottery_points >= POINT_NECESSARY:
+                # azzera punti della lotteria
+                current_user.lottery_points -= POINT_NECESSARY
+
+                # prendi un messaggio destinato all'utente corrente e cambia la data di invio
+                _lotteryMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date>datetime.datetime.today()).filter(Message.deleted==False)
+                lotMsg = _lotteryMessages.all()
+                if lotMsg:
+                    randIndex = randint(0,len(lotMsg)-1)
+                    lotMsg = _lotteryMessages.all()[randIndex]
+                    
+                    # inserire nel body del messaggio la data di invio originaria
+                    lotMsg[0].body = "Predetermined delivery date: {}\n".format(lotMsg[0].delivery_date) + lotMsg[0].body 
+                    lotMsg[0].delivery_date = datetime.datetime.today()
+                    db.session.commit()
+            else:
+                flash("You don't have the necessary point for withdraw a message!")
+                return redirect("/mailbox")
+            
+            
         _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
         _filter_word = db.session.query(Filter_list).filter(Filter_list.user_id == current_user.id)
         _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today()).filter(Message.deleted==False)
@@ -311,11 +337,6 @@ def inbox():
     else:
         return redirect('/login')
 
-@users.route("/tasks", methods=["POST", "GET"])
-def run_task():
-    task = create_task.delay(int(5))
-    task.wait()
-    return({"value":"done"})
 
 @users.route("/message/<id>", methods=["GET", "POST"])
 def message_view(id):
@@ -373,3 +394,31 @@ def calendar():
         return render_template('calendar.html', events = events)
     else:
         return redirect('/login')
+
+@users.route("/lottery", methods=["GET","POST"])
+def lottery():
+    
+    if current_user is not None and hasattr(current_user, 'id'):
+        lottery_query=db.session.query(Lottery).filter(Lottery.contestant_id == current_user.id).all()
+        print(lottery_query)
+        if request.method == "POST":
+                if(not lottery_query):  #double-check security in case of a post request via CLI
+                    new_contestant = Lottery()
+                    new_contestant.contestant_id = current_user.id
+                    print("utente aggiunto al db lottery:" + str(current_user.id) )
+                    db.session.add(new_contestant)
+                    db.session.commit()
+                
+                    flash("You're partecipating to the lottery!")
+                    return redirect("/mailbox")
+                else:
+                    flash("You're already partecipating to the lottery!")
+                    return redirect("/mailbox")
+        elif request.method == "GET":
+                is_partecipating = 1
+                if(not lottery_query):
+                    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                    is_partecipating = 0
+                return render_template("lottery.html", is_partecipating = is_partecipating)
+    else:
+        return redirect('/login') 
