@@ -12,7 +12,7 @@
       <h5>points: </h5> {{current_user.lottery_points}}
       {% if current_user.lottery_points > 0 %}
             <input type=submit name="submit_button" value='withdraw_message' onclick='
-                  window.location.href = `/mailbox?lottery=1`;' />
+                  window.location.href = `/delete_messages`;' />
       {% endif %}
 
       <br><br><br>
@@ -26,10 +26,10 @@
             <input type="text" id="birthday" format="%d/%m/%Y" name="birthday" value="{{current_user.date_of_birth}}">
             <h5> location : </h5>
             <input type="text" id="location" name="location" value="{{current_user.location}}">
-            <h5> old password : </h5>
-            <input type="text" id="old_password" name="old_password" value="">
-            <h5> new password: </h5>
+            <h5> new password (if you want): </h5>
             <input type="text" id="new_password" name="new_password" value="">
+            <h5> Confirm password (for commit change) : </h5>
+            <input type="text" id="old_password" name="old_password" value="">
             <br><br>
             <input type="submit" value="change_info">
       </form>
