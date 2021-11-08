@@ -5,68 +5,77 @@ import re
 from types import MethodDescriptorType
 from flask.helpers import flash
 from sqlalchemy import select
-import time
 import datetime
 from flask import Flask,Blueprint, blueprints, redirect, render_template, request, abort
 from flask_login import current_user, logout_user
 from sqlalchemy.orm import query
 from werkzeug.security import check_password_hash, generate_password_hash
 import base64
-
 from monolith.database import BlackList, ReportList, User, db, Message, Filter_list,Lottery
-
 from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
 from random import randint
 
+# Point necessary for withdraw a scheduled/sended message
 POINT_NECESSARY = 12
 
 users = Blueprint('users', __name__)
 
-
 @users.route('/users')
 def _users():
+    '''
+        Show a list of the online and offline users registered to MessageInABottle.
+        Also provide the functionality for block and report a user.
+    '''
     if current_user is not None and hasattr(current_user, 'id'):
         new_blackList = BlackList()
         new_reportlist = ReportList()
         new_blackList.user_id = current_user.id
-        print(new_blackList.user_id)
         new_blackList.blacklisted_user_id = request.args.get("block_user_id")
-        print(new_blackList.blacklisted_user_id)
+
         if new_blackList.blacklisted_user_id is not None:
+            
+            # put user in the blacklist
             if request.args.get("block") == "1":
+                
                 _list = db.session.query(BlackList).filter(BlackList.user_id==new_blackList.user_id).filter(BlackList.blacklisted_user_id==new_blackList.blacklisted_user_id)
                 if _list.first() is not None:
-                    print("già in blacklist")
+                    print("Already in blacklist")
                 else:
                     db.session.add(new_blackList)
                     db.session.commit()
-                    print("inserimento blacklist")
+                    print("Added to the blacklist")
+            
+            # remove user from the blacklist
             elif request.args.get("block") == "0":
                 blacklist_id = db.session.query(BlackList).filter(BlackList.user_id==new_blackList.user_id).filter(BlackList.blacklisted_user_id==new_blackList.blacklisted_user_id)
                 if blacklist_id.first() is not None:
                     db.session.query(BlackList).filter(BlackList.id==blacklist_id.first().id).delete()
                     db.session.commit()
-                    print("rimozione blacklist")
+                    print("removed from blacklist")
                 else:
-                    print("utente non in blacklist")
+                    print("operation not allowed: the user is not in the blacklist")
             else:
                 new_reportlist.user_id = current_user.id
                 new_reportlist.reportlisted_user_id = request.args.get("block_user_id")
                 _list = db.session.query(ReportList).filter(ReportList.user_id==new_reportlist.user_id).filter(ReportList.reportlisted_user_id==new_reportlist.reportlisted_user_id)
                 if _list.first() is not None:
-                    print("già segnalato")
+                    print("user already reported")
                 else:
                     db.session.add(new_reportlist)
                     db.session.commit()
-                    print("inserimento reportlist")
+                    print("added to reportlist")
         _users = db.session.query(User).filter(User.is_deleted==False).filter(User.id!=current_user.id)
         return render_template("users.html", users=_users)
     else:
         return redirect('/login')
 
+
 @users.route('/create_user', methods=['POST', 'GET'])
 def create_user():
+    '''
+        Create a user
+    '''
     form = UserForm()
     if not (current_user is not None and hasattr(current_user, 'id')):
         if request.method == 'POST':
@@ -97,20 +106,29 @@ def create_user():
     else:
         return "You are currently logged in, you have to <a href=/logout>logout</a> first"  
 
+
 @users.route('/send', methods=['POST', 'GET'])
 def send():
-    isDraft =False
-    draftReciever = request.args.get("reciever")
-    draftBody = request.args.get("body")
-    isReply = request.args.get("reply")
-    draft_id = request.args.get('draft_id')
+    '''
+        Send a message to a user.
+        POST:
+        GET:
+    '''
+
+    isDraft =False                                                  # The message by default is set as "NOT A DRAFT"
+    draftReciever = request.args.get("reciever")                    # take argument "reciever"
+    draftBody = request.args.get("body")                            # take argument "body"
+    isReply = request.args.get("reply")                             # take arument reply
+    draft_id = request.args.get('draft_id')                         # # take argument "draft_id"
     form = SendForm()
     if request.method == 'POST':
         if form.data is not None and form.data['recipient'] is not None:
+            # check for images
             if request.files['image_file'] is not None:
                 image_binary=base64.b64encode(request.files['image_file'].read())
             else:
                 image_binary = ""
+            #check if a buttom is pressed
             if request.form['submit_button'] == "Send" or request.form['submit_button'] == 'Save as draft':
                 if draft_id is not None:
                     draft_message=db.session.query(Message).filter(Message.message_id==draft_id).delete()
@@ -290,6 +308,15 @@ def delete_account():
 
 @users.route('/mailbox', methods=['GET'])
 def inbox():
+    '''
+        Shows the mailbox of the user divded into three parts
+        1) The Inbox part shows the received messages
+        2) The Sent part shows the messages that user sent
+        3) The Draft part shows the messages in the draft
+
+        It also provides the functionality for the user to delete future 
+        messages if the user is lottery winner
+    '''
     if current_user is not None and hasattr(current_user, 'id'):
         # WITHDRAW MESSAGE (LOTTERY POINT)
         if request.args.get("lottery") :
@@ -356,17 +383,17 @@ def message_view(id):
             else:
                 return 'You can\'t delete this message!'
         else:
-            #Received messages
+            # Received messages
             query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.deleted==False)
             if query.first() != None:
                 message=query.first()
-                if message[0].receiver_id == current_user.id and message[0].delivery_date<=datetime.datetime.today():
+                if message[0].receiver_id == current_user.id and message[0].delivery_date<=datetime.date.today():
                     if not message[0].opened:
                         message[0].opened = True
                         db.session.commit()
                     return render_template('message.html', message=message, mode='received')
             
-            #Sent messages (DON'T FILTER FOR DELETED MESSAGES OTHERWISE THE SENDER KNOWS THAT THE MESSAGE IS DELETED BY THE RECIPIENT)
+            # Sent messages (DON'T FILTER FOR DELETED MESSAGES OTHERWISE THE SENDER KNOWS THAT THE MESSAGE IS DELETED BY THE RECIPIENT)
             query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
             if query.first() != None:
                 message=query.first()
@@ -379,6 +406,9 @@ def message_view(id):
 
 @users.route('/calendar')
 def calendar():
+    '''
+        Shows sent and received messages to the user in the calendar.
+    '''
     if current_user is not None and hasattr(current_user, 'id'):
         _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
         _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today()).filter(Message.deleted==False)
@@ -397,18 +427,21 @@ def calendar():
 
 @users.route("/lottery", methods=["GET","POST"])
 def lottery():
-    
+    ''' 
+        The user can partecipate to the monthly lottery
+    '''
     if current_user is not None and hasattr(current_user, 'id'):
+        # asking if the user is already a participant of the lottery
         lottery_query=db.session.query(Lottery).filter(Lottery.contestant_id == current_user.id).all()
-        print(lottery_query)
+
         if request.method == "POST":
-                if(not lottery_query):  #double-check security in case of a post request via CLI
+                if(not lottery_query):
                     new_contestant = Lottery()
                     new_contestant.contestant_id = current_user.id
-                    print("utente aggiunto al db lottery:" + str(current_user.id) )
+                    print("User added to lottery db:" + str(current_user.id) )
                     db.session.add(new_contestant)
                     db.session.commit()
-                
+
                     flash("You're partecipating to the lottery!")
                     return redirect("/mailbox")
                 else:
@@ -417,7 +450,6 @@ def lottery():
         elif request.method == "GET":
                 is_partecipating = 1
                 if(not lottery_query):
-                    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                     is_partecipating = 0
                 return render_template("lottery.html", is_partecipating = is_partecipating)
     else:

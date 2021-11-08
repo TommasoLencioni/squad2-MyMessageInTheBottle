@@ -4,7 +4,6 @@ from monolith.auth import login_manager
 from monolith.database import User, db, Message, Lottery
 from monolith.views import blueprints
 from celery import Celery
-import time
 from flask_mail import Mail
 from flask_mail import Message as MessageFlask
 from celery.schedules import crontab
@@ -12,6 +11,9 @@ from random import randint
 
 
 def make_celery(app):
+    '''
+        Function for create Celery instance 
+    '''
     celery = Celery(
         app.import_name,
         backend=app.config['CELERY_RESULT_BACKEND'],
@@ -28,6 +30,9 @@ def make_celery(app):
     return celery
 
 def create_app():
+    '''
+        Create an app instance
+    '''
     app = Flask(__name__)
     app.config['CELERY_BROKER_URL'] = 'redis://redis:6379'
     app.config['CELERY_RESULT_BACKEND'] = 'redis://redis:6379'
@@ -50,7 +55,7 @@ def create_app():
     login_manager.init_app(app)
     db.create_all(app=app)
 
-    # create a first admin user
+    # create a first admin user with default parameter
     with app.app_context():
         q = db.session.query(User).filter(User.email == 'example@example.com')
         user = q.first()
@@ -58,25 +63,32 @@ def create_app():
             example = User()
             example.firstname = 'Admin'
             example.lastname = 'Admin'
-            example.email = 'example@example.com'
+            example.email = 'admin@example.com'
             example.dateofbirth = datetime.datetime(2020, 10, 5)
             example.is_admin = True
             example.set_password('admin')
             db.session.add(example)
             db.session.commit()
-
     return app
 
-
+#create app, celery and mail 
 app = create_app()
 celery = make_celery(app)
 mail = Mail(app)
-
 # *************************************************************************** #
-### CELERY TASKS ###
+# *************************************************************************** #
+
+                            ### CELERY TASKS ###
+
 
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
+    '''
+        Set the time for Celery tasks:
+         - every 1 minute execute the task "checkNewMessage"
+         - every 1 minute execute the task "checkMessageOpened"
+         - every month at day 1 and time 11:00 execute the task "lottery"
+    '''
     # NOTIFY FOR A MESSAGE RECEIVED: Executes every minute
     sender.add_periodic_task(60.0, checkNewMessage.s(), name='check for new message received...')
     
@@ -88,6 +100,12 @@ def setup_periodic_tasks(sender, **kwargs):
         crontab(hour=11, minute=00, day_of_month='1'), lottery.s())
 
 def send_mail(email, body):
+    '''
+        This function will send mail at users provided in "email" field.
+        In case the body is none the function will be called from "checkNewMessage" task,
+        otherwise will be called from "checkMessageOpened" task.
+    '''
+
     print ("sending_mail...")
 
     # Case "new message received"
@@ -105,7 +123,10 @@ def send_mail(email, body):
 
 
 def send_mail_lottery(email, winner):
-    print("sending mail lottery...")
+    '''
+        Will send an email after the lottery task to all users, for announcing the winner
+    '''
+    print("sending lottery mail...")
     msg = MessageFlask("Monthly winner!", sender="provaase5@gmail.com", recipients=email)
     msg.html = """<p>The monthly winner for the lottery is....</p>
                     <h2>{}</h2>""".format(winner)
@@ -113,7 +134,10 @@ def send_mail_lottery(email, winner):
 
 @celery.task
 def checkNewMessage():
-    # This method will notify the user when recive a new message
+    '''
+        This method will notify the user when recive a new message.
+        This method also send the message to users.
+    '''
 
     # Take current time
     now = datetime.datetime.now()
@@ -121,7 +145,7 @@ def checkNewMessage():
     # Retrive all the message delivered and not notified
     to_notify = db.session.query(Message).filter(Message.is_delivered == False).filter(Message.delivery_date <= now)
 
-    # For-each message flag it as notified and send an email to the user
+    # For-each message, flag it as notified and send an email to the user
     for item in to_notify.all():
         user = db.session.query(User).filter(User.id == item.receiver_id)
         item.is_delivered = True
@@ -131,12 +155,14 @@ def checkNewMessage():
 
 @celery.task
 def checkMessageOpened():
-    # This method will send a notification when a send message has been opened
+    '''
+        This method will send a notification when a send message has been opened
+    '''
     
     # Retrive all the message opened and not notified
     to_notify = db.session.query(Message).filter(Message.opened == True).filter(Message.is_opened_notified == False)
 
-    # For-each message flag it as notified and send an email to the user
+    # For-each message, flag it as notified and send an email to the user
     for item in to_notify.all():
         user = db.session.query(User).filter(User.id == item.sender_id)
         item.is_opened_notified = True
@@ -147,6 +173,11 @@ def checkMessageOpened():
 
 @celery.task
 def lottery():
+    '''
+        Recover all the participants to the lottery and extract a random winner.
+        Will add "1 lottery point" to the winner
+        At the end send an email to all participant with the nickname of the winner.
+    '''
     print("lottery task")
     # List of participants
     list_participant = []
@@ -159,11 +190,12 @@ def lottery():
         print(user.contestant_id)
         list_participant.append(user.contestant_id)
     
-    #Reset monthly lottery table
+    # Reset monthly lottery table
     addresses = db.session.query(Lottery)
     addresses.delete()
     db.session.commit()
 
+    # If there is no participant to the winner, the task is ended
     if len(list_participant) == 0:
         return 0
 
