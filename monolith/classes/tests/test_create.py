@@ -702,3 +702,11 @@ class Test(unittest.TestCase):
             add(5, 1)
             #create_task("ciao")
             assert True
+
+# test calendar
+    def test_calendar(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL = '/calendar'
+            r = app2.get(URL)
+            assert r.status_code == 302
