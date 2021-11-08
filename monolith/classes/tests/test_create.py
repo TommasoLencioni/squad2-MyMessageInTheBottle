@@ -6,7 +6,7 @@ from monolith.app import *
 from monolith.app import app as TestedApp
 import unittest
 import json
-from monolith.database import BlackList, Message, ReportList
+from monolith.database import BlackList, Filter_list, Message, ReportList
 
 LOGIN_OK = 200
 LOGIN_FAIL = 201
@@ -388,10 +388,157 @@ class Test(unittest.TestCase):
 #test profile
 
 #1) change info
+    def test_change_info(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/profile'
+            payload = {
+                'firstname': 'name_test',
+                'surname': 'surname_test',
+                'new_password': 'pass_test',
+                'old_password': 'pass5',
+                'submit_button': 'Save changes',
+            }
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            r = app2.post(URL, data=payload)
+            db_check=db.session.query(User).filter(User.id==nick5.id).filter(User.firstname=="name_test").filter(User.lastname=="surname_test").first()
+            assert db_check is not None
 
 #2) change info with wrong password
-
+    def test_change_info_wrong_password(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/profile'
+            payload = {
+                'firstname': 'name_test',
+                'surname': 'surname_test',
+                'new_password': 'pass_test',
+                'old_password': 'wrong_pass',
+                'submit_button': 'Save changes',
+            }
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            r = app2.post(URL, data=payload)
+            db_check=db.session.query(User).filter(User.id==nick5.id).filter(User.firstname=="name_test").filter(User.lastname=="surname_test").first()
+            assert db_check is None
 #3) word filter
+    def test_change_filter(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/profile'
+            payload = {
+                'filter': 'ciao,addio',
+                'submit_button': 'Submit',
+            }
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            r = app2.post(URL, data=payload)
+            db_check=db.session.query(Filter_list).filter(Filter_list.user_id==nick5.id).filter(Filter_list.list=="ciao,addio").first()
+            assert db_check is not None
 
 #4) profile without login
+    def test_enter_profile_page_without_login(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL = '/profile'
+            r = app2.get(URL)
+            assert r.status_code == 302
 
+
+#test logout
+
+#1) logout
+    def test_logout(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/logout'
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            r = app2.get(URL)
+            print(db.session.query(User).filter(User.nickname=="nick5").first().is_active)
+            db_check=db.session.query(User).filter(User.id==nick5.id).filter(User.is_active==False).first()
+            assert db_check is not None
+
+#2) logout_without login
+    def test_logout_without_login(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL = '/logout'
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            r = app2.get(URL)
+            assert r.status_code == 302
+
+#test delete account
+
+#1) delete account get
+    def test_delete_account_get(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/deleteAccount'
+            r = app2.get(URL)
+            assert r.status_code == 200
+
+#2) delete account post without login
+    def test_delete_account_post(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL = '/deleteAccount'
+            r = app2.post(URL)
+            assert r.status_code == 302  
+
+#3) delete account get without login
+    def test_delete_account_get_without_login(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL = '/deleteAccount'
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            r = app2.get(URL)
+            assert r.status_code == 302
+
+#4) delete account post
+'''
+    def test_delete_account_post(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/deleteAccount'
+            payload = {
+                'confirm_button':'Delete my account'
+            }
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            r = app2.post(URL, data=payload)
+            db_check=db.session.query(User).filter(User.id==nick5.id).filter(User.is_deleted==True).first()
+            assert db_check is not None
+'''

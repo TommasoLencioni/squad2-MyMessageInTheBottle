@@ -33,7 +33,7 @@ def login():
 @auth.route("/logout")
 def logout():
     if current_user is not None and hasattr(current_user, 'id'):
-        q = db.session.query(User).filter(User.firstname==current_user.firstname)
+        q = db.session.query(User).filter(User.id==current_user.id)
         user = q.first()
         user.is_active=False
         db.session.commit()
