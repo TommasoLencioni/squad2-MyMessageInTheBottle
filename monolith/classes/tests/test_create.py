@@ -1,13 +1,17 @@
-from re import U
+from re import T, U
 import unittest
 import requests
+from celery import Celery
 from sqlalchemy.sql.expression import true
 from monolith.app import *
 from monolith.app import app as TestedApp
+from monolith.views.tasks import *
 import unittest
 import json
 from monolith.database import BlackList, Filter_list, Message, ReportList
 import os
+
+from monolith.views.tasks import check
 
 LOGIN_OK = 200
 LOGIN_FAIL = 201
@@ -64,6 +68,45 @@ class Test(unittest.TestCase):
             app2.post(URL, data=payload)
             user_check=db.session.query(User).filter(User.email=='email5').first()
             assert user_check is not None
+
+#1bis) new user just logied
+    def test_a_create_user_just_logged(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r1 = app2.post(URL_login, data=payload)
+            URL = '/create_user'
+            payload = {
+                'email': 'email5',
+                'firstname': 'name5',
+                'lastname': 'last5',
+                'password': 'pass5',
+                'date_of_birth': '1/01/2000',
+                'nickname': 'nick5',
+                'location': 'Pisa'
+            }
+            r = app2.post(URL, data=payload)
+            assert r.status_code == 200
+
+#1bisbis) new user get
+    def test_create_user_get(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL = '/create_user'
+            r = app2.get(URL)
+            assert r.status_code == 200
+
+#1bisbisbis) new user PUT
+    def test_create_user_put(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL = '/create_user'
+            r = app2.put(URL)
+            assert r.status_code == 405
 
 #2) new user with same email 
     def test_create_user_same_email(self):
@@ -143,7 +186,7 @@ class Test(unittest.TestCase):
 #test user
 
     #1) insert a user into blacklist
-    def test_z_add_blacklist(self):
+    def test_y_add_blacklist(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL_login = '/login'
@@ -160,7 +203,7 @@ class Test(unittest.TestCase):
             assert blacklist_check is not None
 
 #2) remove user from blacklist
-    def test_z_remove_blacklist(self):
+    def test_y_remove_blacklist(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL_login = '/login'
@@ -177,7 +220,7 @@ class Test(unittest.TestCase):
             assert blacklist_check is  None
 
 #3) add two times a user in the balcklist
-    def test_z_double_blacklist(self):
+    def test_y_double_blacklist(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL_login = '/login'
@@ -196,7 +239,7 @@ class Test(unittest.TestCase):
 
 
 #4) remove two times a user from the blacklist
-    def test_z_double_remove_blacklist(self):
+    def test_y_double_remove_blacklist(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL_login = '/login'
@@ -274,10 +317,11 @@ class Test(unittest.TestCase):
                 'recipient': 'nick1',
                 'body': 'ciao nick1',
                 'delivery_date' : '7/11/2021',
-                'submit_button' : 'Send'
+                'submit_button' : 'Send',
+                'image_file' :  ''
             }
             print('prima')
-            file = {'image_file': ''}
+            # file = {'image_file': ''}
             r = app2.post(URL, data=payload)
             print(r.response)
             print(r.get_data)
@@ -455,7 +499,7 @@ class Test(unittest.TestCase):
                 'surname': 'surname_test',
                 'new_password': 'pass_test',
                 'old_password': 'wrong_pass',
-                'submit_button': 'Save changes',
+                'submit_button': 'Save changes'
             }
             nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
             r = app2.post(URL, data=payload)
@@ -463,7 +507,7 @@ class Test(unittest.TestCase):
             assert db_check is None
             
 #3) word filter
-    def test_change_filter(self):
+    def test_change_z_filter(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL_login = '/login'
@@ -490,6 +534,39 @@ class Test(unittest.TestCase):
             r = app2.get(URL)
             assert r.status_code == 302
 
+#5) change info get
+    def test_change_info_get(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/profile'
+            r=app2.get(URL)
+            assert r.status_code == 200
+
+#6) change info get filter just exist
+    def test_change_info_get_filter_exist(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            filter = Filter_list()
+            filter.user_id=db.session.query(User).filter(User.nickname=='nick5').first().id
+            filter.list = "ciao"
+            db.session.add(filter)
+            db.session.commit()
+            URL = '/profile'
+            r=app2.get(URL)
+            db.session.delete(filter)
+            assert r.status_code == 200
 
 #test logout
 
@@ -522,7 +599,7 @@ class Test(unittest.TestCase):
 #test delete account
 
 #1) delete account get
-    def test_y_delete_account_get(self):
+    def test_z_delete_account_get(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL_login = '/login'
@@ -537,7 +614,7 @@ class Test(unittest.TestCase):
  
 
 #2) delete account get without login
-    def test_y_delete_account_get_without_login(self):
+    def test_z_delete_account_get_without_login(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL = '/deleteAccount'
@@ -545,3 +622,83 @@ class Test(unittest.TestCase):
             r = app2.get(URL)
             assert r.status_code == 302
 
+#3) delete account post 
+    def test_zy_delete_account_post(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/deleteAccount'
+            payload = {
+                'confirm_button' : 'Delete my account'
+            }
+            r = app2.post(URL, data=payload)
+            nick5 = db.session.query(User).filter(User.nickname=='nick5').first()
+            check_db = db.session.query(User).filter(User.nickname==nick5.id).filter(User.is_deleted==True)
+            assert check_db is not None
+
+#4) delete account post without login
+    def test_zy_delete_account_post_without_login(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL = '/deleteAccount'
+            payload = {
+                'confirm_button' : 'Delete my account'
+            }
+            r = app2.post(URL, data=payload)
+            assert r.status_code == 200
+
+#delete account post error button
+    def test_zy_delete_account_post_error_button(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/deleteAccount'
+            payload = {
+                'confirm_button' : 'test'
+            }
+            r = app2.post(URL, data=payload)
+            assert r.status_code == 302
+
+#test home
+
+#1) home logged
+    def test_home(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/'
+            r = app2.get(URL)
+            assert r.status_code == 302
+#2) home without login
+    def test_home_without_login(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL = '/'
+            r = app2.get(URL)
+            assert r.status_code == 302
+
+#test task
+
+    def test_task(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            check("test")
+            test("test")
+            add(5, 1)
+            #create_task("ciao")
+            assert True
