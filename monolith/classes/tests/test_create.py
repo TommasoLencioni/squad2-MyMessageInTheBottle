@@ -29,7 +29,7 @@ class Test(unittest.TestCase):
                 'nickname': 'nick5',
                 'location': 'Pisa'
             }
-            app2.post(URL, data=json.dumps(payload))
+            app2.post(URL, data=payload)
             user_check=db.session.query(User).filter(User.email=='email5').first()
             assert user_check is not None
 
@@ -47,7 +47,7 @@ class Test(unittest.TestCase):
                 'nickname': 'nick',
                 'location': 'Pisa'
             }
-            r = app2.post(URL, data=json.dumps(payload))
+            r = app2.post(URL, data=payload)
             assert r.status_code == 302
 
 
@@ -65,7 +65,7 @@ class Test(unittest.TestCase):
                 'nickname': 'nick5',
                 'location': 'Pisa'
             }
-            r = app2.post(URL, data=json.dumps(payload))
+            r = app2.post(URL, data=payload)
             #assert r.url == 'http://127.0.0.1:5000/create_user'
             assert r.status_code == 302
 
@@ -111,7 +111,7 @@ class Test(unittest.TestCase):
 #test user
 
     #1) insert a user into blacklist
-    def test_add_blacklist(self):
+    def test_z_add_blacklist(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL_login = '/login'
@@ -122,22 +122,13 @@ class Test(unittest.TestCase):
             r1 = app2.post(URL_login, data=payload)
             URL = '/users'
             nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
-            user1 = User()
-            user1.nickname = "nick1"
-            user1.lastname = "last1"
-            user1.firstname = "name1"
-            User.set_password(user1,"pass1")
-            user1.location = "Pisa"
-            user1.email = "email1"
-            db.session.add(user1)
-            db.session.commit()
             nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
             r = app2.get(URL+'?block_user_id='+str(nick1.id)+'&block=1') #block user1
             blacklist_check=db.session.query(BlackList).filter(BlackList.user_id==nick5.id).filter(BlackList.blacklisted_user_id==nick1.id).first()
             assert blacklist_check is not None
 
 #2) remove user from blacklist
-    def test_remove_blacklist(self):
+    def test_z_remove_blacklist(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL_login = '/login'
@@ -154,7 +145,7 @@ class Test(unittest.TestCase):
             assert blacklist_check is  None
 
 #3) add two times a user in the balcklist
-    def test_double_blacklist(self):
+    def test_z_double_blacklist(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL_login = '/login'
@@ -173,7 +164,7 @@ class Test(unittest.TestCase):
 
 
 #4) remove two times a user from the blacklist
-    def test_double_remove_blacklist(self):
+    def test_z_double_remove_blacklist(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL_login = '/login'
@@ -269,15 +260,6 @@ class Test(unittest.TestCase):
                 'password': 'pass5'
             }
             r_login = app2.post(URL_login, data=payload_login)
-            user2 = User()
-            user2.nickname = "nick2"
-            user2.lastname = "last2"
-            user2.firstname = "name2"
-            User.set_password(user2,"pass2")
-            user2.location = "Pisa"
-            user2.email = "email2"
-            db.session.add(user2)
-            db.session.commit()
             URL = '/send'
             payload = {
                 'recipient': ['nick1','nick2'],
@@ -290,6 +272,8 @@ class Test(unittest.TestCase):
             nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
             nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
             nick2 = db.session.query(User).filter(User.nickname=="nick2").first()
+            print(nick1.id)
+            print(nick2.id)
             message_check_nick1=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 e nick2").first()
             message_check_nick2=db.session.query(Message).filter(Message.receiver_id==nick2.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 e nick2").first()
             assert message_check_nick1 is not None and message_check_nick2 is not None
@@ -315,6 +299,7 @@ class Test(unittest.TestCase):
             r = app2.post(URL, data=payload)
             nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
             nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
+            print(nick1.id)
             message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao draft nick1").filter(Message.is_draft==True).first()
             assert message_check is not None
 
@@ -340,6 +325,8 @@ class Test(unittest.TestCase):
             nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
             nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
             nick2 = db.session.query(User).filter(User.nickname=="nick2").first()
+            print(nick1.id)
+            print(nick2.id)
             message_check_nick1=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 e nick2").filter(Message.is_draft==True).first()
             message_check_nick2=db.session.query(Message).filter(Message.receiver_id==nick2.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 e nick2").filter(Message.is_draft==True).first()
             assert message_check_nick1 is not None and message_check_nick2 is not None
@@ -432,6 +419,7 @@ class Test(unittest.TestCase):
             r = app2.post(URL, data=payload)
             db_check=db.session.query(User).filter(User.id==nick5.id).filter(User.firstname=="name_test").filter(User.lastname=="surname_test").first()
             assert db_check is None
+            
 #3) word filter
     def test_change_filter(self):
         with app.app_context():
@@ -504,16 +492,9 @@ class Test(unittest.TestCase):
             URL = '/deleteAccount'
             r = app2.get(URL)
             assert r.status_code == 200
+ 
 
-#2) delete account post without login
-    def test_delete_account_post(self):
-        with app.app_context():
-            app2=TestedApp.test_client()
-            URL = '/deleteAccount'
-            r = app2.post(URL)
-            assert r.status_code == 302  
-
-#3) delete account get without login
+#2) delete account get without login
     def test_delete_account_get_without_login(self):
         with app.app_context():
             app2=TestedApp.test_client()
@@ -522,23 +503,3 @@ class Test(unittest.TestCase):
             r = app2.get(URL)
             assert r.status_code == 302
 
-#4) delete account post
-'''
-    def test_delete_account_post(self):
-        with app.app_context():
-            app2=TestedApp.test_client()
-            URL_login = '/login'
-            payload_login = {
-                'email': 'email5',
-                'password': 'pass5'
-            }
-            r_login = app2.post(URL_login, data=payload_login)
-            URL = '/deleteAccount'
-            payload = {
-                'confirm_button':'Delete my account'
-            }
-            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
-            r = app2.post(URL, data=payload)
-            db_check=db.session.query(User).filter(User.id==nick5.id).filter(User.is_deleted==True).first()
-            assert db_check is not None
-'''
