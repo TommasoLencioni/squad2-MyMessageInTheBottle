@@ -7,16 +7,48 @@ from monolith.app import app as TestedApp
 import unittest
 import json
 from monolith.database import BlackList, Filter_list, Message, ReportList
+import os
 
 LOGIN_OK = 200
 LOGIN_FAIL = 201
 DOUBLE_LOGIN = 202
 
 class Test(unittest.TestCase):
+
+#db operation
+
+#1) set db
+    def test_aa_initialize(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            user1 = User()
+            user1.email = 'email1'
+            user1.firstname = 'name1'
+            user1.lastname = 'last1'
+            user1.location = 'Pisa'
+            user1.nickname = 'nick1'
+            User.set_password(user1,'pass1')
+            db.session.add(user1)
+            user2 = User()
+            user2.email = 'email2'
+            user2.firstname = 'name2'
+            user2.lastname = 'last2'
+            user2.location = 'Pisa'
+            user2.nickname = 'nick2'
+            User.set_password(user2,'pass2')
+            db.session.add(user2)
+            db.session.commit()
+            assert True
+
+#2) drop db
+    def test_zz_drop_db(self):
+        os.remove("mmiab.db")
+        assert True
+
 #test create
 
 #1) new user
-    def test_create_user(self):
+    def test_a_create_user(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL = '/create_user'
@@ -226,7 +258,7 @@ class Test(unittest.TestCase):
 
 #test send
 
-    #1) send email
+#1) send email
     def test_send_email(self):
         with app.app_context():
             app2=TestedApp.test_client()
@@ -235,16 +267,22 @@ class Test(unittest.TestCase):
                 'email': 'email5',
                 'password': 'pass5'
             }
+            print('ora')
             r_login = app2.post(URL_login, data=payload_login)
             URL = '/send'
             payload = {
                 'recipient': 'nick1',
                 'body': 'ciao nick1',
-                'delivery_date': '7/11/2021',
-                'submit_button': 'Send',
+                'delivery_date' : '7/11/2021',
+                'submit_button' : 'Send'
             }
+            print('prima')
             file = {'image_file': ''}
             r = app2.post(URL, data=payload)
+            print(r.response)
+            print(r.get_data)
+            print(r.status_code)
+            print("qui")
             nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
             nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
             message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1").first()
@@ -287,21 +325,25 @@ class Test(unittest.TestCase):
                 'email': 'email5',
                 'password': 'pass5'
             }
+            print('ora')
             r_login = app2.post(URL_login, data=payload_login)
             URL = '/send'
             payload = {
                 'recipient': 'nick1',
-                'body': 'ciao draft nick1',
+                'body': 'ciao nick1',
                 'delivery_date': '7/11/2021',
-                'submit_button': 'Save as draft',
+                'submit_button': 'Save as Draft',
             }
+            print('prima')
             file = {'image_file': ''}
             r = app2.post(URL, data=payload)
+            print(r.status_code)
+            print("qui")
             nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
             nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
-            print(nick1.id)
-            message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao draft nick1").filter(Message.is_draft==True).first()
+            message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.is_draft==True).first()
             assert message_check is not None
+
 
 #4) draft email to multiple users
     def test_draft_email_multiple_users(self):
@@ -340,7 +382,7 @@ class Test(unittest.TestCase):
             assert r.status_code == 302
 
 #6) message with blacklist
-    def test_send_email(self):
+    def test_send_email_blacklist(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL_login = '/login'
@@ -480,7 +522,7 @@ class Test(unittest.TestCase):
 #test delete account
 
 #1) delete account get
-    def test_delete_account_get(self):
+    def test_y_delete_account_get(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL_login = '/login'
@@ -495,7 +537,7 @@ class Test(unittest.TestCase):
  
 
 #2) delete account get without login
-    def test_delete_account_get_without_login(self):
+    def test_y_delete_account_get_without_login(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL = '/deleteAccount'
