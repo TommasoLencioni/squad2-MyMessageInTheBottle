@@ -354,3 +354,12 @@ def lottery():
                 return render_template("lottery.html", is_partecipating = is_partecipating)
     else:
         return redirect('/login') 
+
+@users.route("/delete_message", methods=["GET","POST"])
+def delete_message():
+    if current_user is not None and hasattr(current_user, 'id'):
+        _futureMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.delivery_date>datetime.datetime.today()).filter(Message.receiver_id==User.id)
+        return render_template("delete_messages.html", futureMessages = _futureMessages.all())
+
+    else:
+        return redirect('/login')     
