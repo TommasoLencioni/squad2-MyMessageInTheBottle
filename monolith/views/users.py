@@ -198,7 +198,7 @@ def send():
                 dictUS[draftReciever] = 1
             return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS, is_submitted=True)
         
-    elif request.method == 'GET':
+    else:
         if current_user is not None and hasattr(current_user, 'id'):
             form.body.data=draftBody
             user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)
@@ -222,7 +222,7 @@ def send():
                 dictUS[db.session.query(User).filter(User.id==draft_message.receiver_id).first().nickname] = 1
 
             q = db.session.query(User).filter(User.id == current_user.id)
-            return render_template("send.html", current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS, draft_id=draft_id)
+            return render_template("send.html", current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS, draft_id=draft_id), 200
         else:
             welcome = None
             return redirect('/login')
@@ -465,8 +465,8 @@ def delete_message():
     if current_user is not None and hasattr(current_user, 'id'):
         if current_user.lottery_points >= POINT_NECESSARY:
             _futureMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.delivery_date>datetime.datetime.today()).filter(Message.deleted==False).filter(Message.receiver_id==User.id)
-            return render_template("delete_messages.html", futureMessages = _futureMessages.all())
+            return render_template("delete_messages.html", futureMessages = _futureMessages.all()), 201
         else:
             return redirect('/mailbox')
     else:
-        return redirect('/login')     
+        return redirect('/login')

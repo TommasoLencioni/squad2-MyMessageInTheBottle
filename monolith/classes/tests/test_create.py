@@ -12,12 +12,14 @@ DOUBLE_LOGIN = 202
 
 class Test(unittest.TestCase):
 
+
 #db operation
 
 #1) set db
     def test_aa_initialize(self):
         with app.app_context():
             app2=TestedApp.test_client()
+
             user1 = User()
             user1.email = 'email1'
             user1.firstname = 'name1'
@@ -26,6 +28,7 @@ class Test(unittest.TestCase):
             user1.nickname = 'nick1'
             User.set_password(user1,'pass1')
             db.session.add(user1)
+
             user2 = User()
             user2.email = 'email2'
             user2.firstname = 'name2'
@@ -34,6 +37,16 @@ class Test(unittest.TestCase):
             user2.nickname = 'nick2'
             User.set_password(user2,'pass2')
             db.session.add(user2)
+
+            user3 = User()
+            user3.email = 'email1@prova.it'
+            user3.firstname = 'name1'
+            user3.lastname = 'last1'
+            user3.location = 'Pisa'
+            user3.nickname = 'nickOK'
+            User.set_password(user3, 'pass1')
+            db.session.add(user3)
+
             db.session.commit()
             assert True
 
@@ -101,7 +114,7 @@ class Test(unittest.TestCase):
             r = app2.put(URL)
             assert r.status_code == 405
 
-#2) new user with same email 
+#2) new user with same email
     def test_create_user_same_email(self):
         with app.app_context():
             app2=TestedApp.test_client()
@@ -193,6 +206,7 @@ class Test(unittest.TestCase):
             nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
             r = app2.get(URL+'?block_user_id='+str(nick1.id)+'&block=1') #block user1
             blacklist_check=db.session.query(BlackList).filter(BlackList.user_id==nick5.id).filter(BlackList.blacklisted_user_id==nick1.id).first()
+            app2.get(URL) #testing 36-66
             assert blacklist_check is not None
 
 #2) remove user from blacklist
@@ -317,6 +331,10 @@ class Test(unittest.TestCase):
             nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
             nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
             message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1").first()
+
+            #get send
+            r=app2.get(URL)
+
             assert message_check is not None
 
 #1bis) send email without recipient
@@ -514,7 +532,7 @@ class Test(unittest.TestCase):
             db.session.commit()
             test_blacklist_removed = db.session.query(BlackList).filter(BlackList.id==nick1.id).filter(BlackList.blacklisted_user_id==nick5.id).first()
             assert message_check is None and test_blacklist_removed is None
-            
+
 #7)test send as message
     def test_send_email_send_as_message(self):
         with app.app_context():
@@ -669,7 +687,7 @@ class Test(unittest.TestCase):
             r = app2.post(URL, data=payload)
             db_check=db.session.query(User).filter(User.id==nick5.id).filter(User.firstname=="name_test").filter(User.lastname=="surname_test").first()
             assert db_check is None
-            
+
 #3) word filter
     def test_change_z_filter(self):
         with app.app_context():
@@ -775,7 +793,7 @@ class Test(unittest.TestCase):
             URL = '/deleteAccount'
             r = app2.get(URL)
             assert r.status_code == 200
- 
+
 
 #2) delete account get without login
     def test_z_delete_account_get_without_login(self):
@@ -786,7 +804,7 @@ class Test(unittest.TestCase):
             r = app2.get(URL)
             assert r.status_code == 302
 
-#3) delete account post 
+#3) delete account post
     def test_zy_delete_account_post(self):
         with app.app_context():
             app2=TestedApp.test_client()
@@ -905,3 +923,181 @@ class Test(unittest.TestCase):
             URL = '/mailbox'
             r = app2.get(URL)
             assert r.status_code == 302
+
+# 1) Test lottery
+    def test_lottery_join(self):
+        with app.app_context():
+            app2 = TestedApp.test_client()
+            URL_LOGIN = '/login'
+            URL_LOTTERY = '/lottery'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_LOGIN, data=payload_login)
+
+            r = app2.post(URL_LOTTERY)
+            nick5 = db.session.query(User).filter(User.nickname == 'nick5').first()
+            query = db.session.query(Lottery).filter(Lottery.contestant_id==nick5.id).first()
+            assert query is not None
+
+# 1) Test join lottery again
+    def test_lottery_join_again(self):
+        with app.app_context():
+            app2 = TestedApp.test_client()
+            URL_LOGIN = '/login'
+            URL_LOTTERY = '/lottery'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_LOGIN, data=payload_login)
+            nick5 = db.session.query(User).filter(User.nickname == 'nick5').first()
+
+
+            # first registration
+            r = app2.post(URL_LOTTERY)
+            query = db.session.query(Lottery).filter(Lottery.contestant_id == nick5.id).all()
+            query_numb = len(query)
+            print(query_numb)
+
+            # second registration
+            r = app2.post(URL_LOTTERY)
+            query2 = db.session.query(Lottery).filter(Lottery.contestant_id == nick5.id).all()
+            query_numb2 = len(query2)
+
+
+
+            assert query_numb2 == query_numb
+
+        # 1) Test lottery
+    def test_winner_lottery(self):
+        with app.app_context():
+            app2 = TestedApp.test_client()
+            URL_DELETE = "/delete_messages"
+
+            # delete senza login
+            r = app2.get(URL_DELETE)
+
+            #login
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+
+            #send message
+            URL = '/send'
+            file_name = "fake-text-stream.txt"
+            payload = {
+                'recipient': 'nick1',
+                'body': 'ciao nick1',
+                'delivery_date': '7/11/2021',
+                "image_file": (io.BytesIO(b"some initial text data"), file_name),
+                'submit_button': 'Send',
+            }
+            r = app2.post(URL, data=payload, content_type="multipart/form-data")
+
+            #delete message
+            nick5 = db.session.query(User).filter(User.nickname == 'nick5').first()
+
+            #delete senza i punti necessari
+            nick5.lottery_points = 0
+            db.session.commit()
+            r = app2.get(URL_DELETE)
+
+            #delete con i punti necessari
+            nick5.lottery_points += 12
+            db.session.commit()
+            r = app2.get(URL_DELETE)
+
+            assert r.status_code == 201
+
+    def test_send_mail(self):
+        with app.app_context():
+            r = send_mail("provaase5@gmail.it","testo body")
+            r1 = send_mail("provaase5@gmail.it", "")
+            assert r and r1
+
+
+    def test_lottery_fun(self):
+        with app.app_context():
+            app2 = TestedApp.test_client()
+            URL_LOGIN = '/login'
+            URL_LOTTERY = '/lottery'
+            payload_login = {
+                'email': 'email1@prova.it',
+                'password': 'pass1'
+            }
+            r_login = app2.post(URL_LOGIN, data=payload_login)
+            nick = db.session.query(User).filter(User.nickname == 'nickOK').first()
+            print (nick.nickname)
+
+            # first registration
+            r = app2.post(URL_LOTTERY)
+            query = db.session.query(Lottery).filter(Lottery.contestant_id == nick.id).all()
+            query_numb = len(query)
+            print(query_numb)
+
+            r = lottery()
+            assert r
+
+    def test_OpenedMessage(self):
+        with app.app_context():
+            app2 = TestedApp.test_client()
+            app2 = TestedApp.test_client()
+
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+
+            URL = '/send'
+            file_name = "fake-text-stream.txt"
+            payload = {
+                'recipient': 'nick1',
+                'body': 'ciao nick1',
+                'delivery_date': '20/11/2021',
+                "image_file": (io.BytesIO(b"some initial text data"), file_name),
+                'submit_button': 'Send',
+            }
+            r = app2.post(URL, data=payload)
+
+            r = checkMessageOpened()
+            assert r
+
+    def test_deletion_message(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/send'
+            file_name="fake-text-stream.txt"
+            payload = {
+                'recipient' : 'nick1',
+                'body' : 'ciao nick1',
+                'delivery_date' : '20/11/2021',
+                "image_file" : (io.BytesIO(b"some initial text data"), file_name),
+                'submit_button' : 'Send',
+            }
+            r = app2.post(URL, data=payload)
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            nick5.lottery_points = 12
+            db.session.commit()
+            nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
+            message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1").first()
+            message_id = message_check.message_id
+            URL = '/message/{}'.format(message_id)
+            URL = URL+"?delete"
+            response = app2.post(URL)
+            URL = '/message/{}'.format(message_id)
+            URL = URL + "?lottery=0"
+            response = app2.post(URL)
+            assert message_check is not None

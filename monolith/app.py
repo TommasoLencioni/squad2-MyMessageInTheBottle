@@ -119,8 +119,11 @@ def send_mail(email, body):
         msg = MessageFlask("Your message has been read!", sender="provaase5@gmail.com", recipients=[email])
         msg.html = """<p>Your message has been read.</p>
                     <p>Message read:</br>{}</p>""".format(body)
-    
-    mail.send(msg)
+
+    if mail.send(msg):
+        return False
+    else:
+        return True
 
 
 def send_mail_lottery(email, winner):
@@ -171,6 +174,8 @@ def checkMessageOpened():
         print(user.first().email)
         send_mail(user.first().email, item.body)
 
+    return True
+
 
 @celery.task
 def lottery():
@@ -186,7 +191,7 @@ def lottery():
     # Retrive the participants to the montlhy lottery
     participants = db.session.query(Lottery)
     if participants.all():
-        print(participants.all())
+        print("partecipanti: "+str(participants.all()))
         for user in participants.all(): 
             print(user)
             print(user.contestant_id)
@@ -198,7 +203,7 @@ def lottery():
         db.session.commit()
 
         if len(list_participant) == 0:
-            return 0
+            return False
 
         # Extract a random winner
         winner = randint(0,len(list_participant)-1)
@@ -220,6 +225,7 @@ def lottery():
             email_user_list.append(participant.first().email)
         send_mail_lottery(email_user_list,nickname_winner)
 
+        return True
 
 if __name__ == '__main__':
     app.run()
