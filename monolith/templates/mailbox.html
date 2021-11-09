@@ -79,11 +79,15 @@
                 <div style="width: 99%; float: left; padding: 10px; overflow: hidden;">
                     {% for message in messages: %}
                         {% if not message[0].opened %}
-                            <a onclick='window.location.href = `/message/{{message[0].message_id}}`;' class="list-group-item list-group-item-sR border-1 a_hover">
+                            <a class="list-group-item list-group-item-sR border-1 a_hover">
                         {% else %}
-                            <a onclick='window.location.href = `/message/{{message[0].message_id}}`;' class="list-group-item list-group-item-sR border-1 div_hover">
+                            <a class="list-group-item list-group-item-sR border-1 div_hover">
                         {% endif %}
                         <div class="row" class="row" style="float: right; margin-right: 1px;">
+                            <div class="flex-grow-1 ml-3">
+                                <input style="margin-top:2px; margin-bottom: 7px;" type='button' class="btn btn-info" value='Open'
+                                    onclick='window.location.href = `/message/{{message[0].message_id}}`;' />
+                            </div>
                             <div class="flex-grow-1 ml-3">
                                 <input style="margin-top:2px; margin-bottom: 7px;" type='button' class="btn btn-info" value='Forward' onclick='
                                     window.location.href = `/send?body={{message[0].body}}`;' />
@@ -136,8 +140,11 @@
             <div class="row">
                 <div style="width: 99%; float: left; padding: 10px; overflow: hidden;">
                     {% for message in sendMessages: %}
-                        <a onclick='window.location.href = `/message/{{message[0].message_id}}`;' class="list-group-item list-group-item-sR border-1 div_hover">
+                        <a class="list-group-item list-group-item-sR border-1 div_hover">
                             <div class="row" style="float: right; margin-right: 1px;">
+                                <div>
+                                    <input style="margin-left: 10px;" type='button' class="btn btn-success" value='Open' onclick='window.location.href = `/message/{{message[0].message_id}}`;' />
+                                </div>
                                 <div>
                                     <input style="margin-left: 10px;" type='button' class="btn btn-info" value='Forward' onclick='
                                         window.location.href = `/send?body={{message[0].body}}`;' />

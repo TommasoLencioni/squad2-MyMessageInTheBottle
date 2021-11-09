@@ -18,6 +18,7 @@
           <div class="row">
 
             {% for user in users: %}
+            {% if user.is_admin == False%}
               <a href="/" class="list-group-item list-group-item-action border-0">
                 <!-- <div class="d-flex align-items-start"> -->
                     <div style="float: left; margin-left: 1px;">
@@ -51,7 +52,7 @@
                 alert("User is Reported!");
               }
               </script>
-            
+            {%endif%}
             {% endfor %}
           </div>
       </div>
