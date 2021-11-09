@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Inbox{% endblock %}
+{% block content %}
+
+<h1>My Message in a Bottle Lottery Prize!</h1>
+{% if current_user.is_authenticated %}
+  <h3>Hi {{ current_user.firstname }}! Choose a message to delete!</h3>
+
+<html>
+
+<div class="container p-0" id="div2">
+    <h1 class="h3 mt-3 mb-3">Sent</h1>
+
+    <div class="px-4 d-none d-md-block">
+        <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+                <input type="text" class="form-control my-3" placeholder="Search...">
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div style="width: 16%; float: left; padding: 10px;">
+            <h2 class="h3 mt-3 mb-3">Reciever</h2>
+            {% for message in futureMessages: %}
+                <a class="list-group-item list-group-item-sR border-1" style="background-color:#ccc;">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-grow-1 ml-3">
+                            {{message[1].nickname}}
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+
+        <div style="width: 17%; float: left; padding: 10px;">
+            <h2 class="h3 mt-3 mb-3">Delivery date</h2>
+            {% for message in futureMessages: %}
+                <a class="list-group-item list-group-item-sD border-1" style="background-color:#ccc;">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-grow-1 ml-3">
+                            {{message[0].delivery_date}}
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+
+        <div style="width: 30%; float: left; padding: 10px;">
+            <h2 class="h3 mt-3 mb-3">Body</h2>
+            {% for message in futureMessages: %}
+                <a class="list-group-item list-group-item-sB border-1" style="background-color:#ccc;">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-grow-1 ml-3">
+                            {{message[0].body}}
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+        <div style="width: 7%; float: left; padding: 10px; margin-top:50px;">
+            <h2 class="h4 mt-4 mb-4"></h2>
+            {% for message in futureMessages: %}
+                <div class="d-flex align-items-start">
+                    <div class="flex-grow-1 ml-3">
+                        <input style="margin-top:2px; margin-bottom: 7px; margin-left: 10px;" type='button' class="btn btn-success" value='Delete' onclick='
+                             alert(`Message Deleted!`);
+                            window.location.href = `/message/{{message[0].message_id}}?delete=True&lottery=True`;' />
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% else %}
+Hi Anonymous, <a href="/login">log in</a> or <a href="/create_user">create an account</a>
+{% endif %}
+</body>
+
+</html>
+{% endblock %}

@@ -186,40 +186,40 @@ def lottery():
     
     # Retrive the participants to the montlhy lottery
     participants = db.session.query(Lottery)
-    print(participants.all())
-    for user in participants.all(): 
-        print(user)
-        print(user.contestant_id)
-        list_participant.append(user.contestant_id)
-    
-    # Reset monthly lottery table
-    addresses = db.session.query(Lottery)
-    addresses.delete()
-    db.session.commit()
+    if participants.all():
+        print(participants.all())
+        for user in participants.all(): 
+            print(user)
+            print(user.contestant_id)
+            list_participant.append(user.contestant_id)
+        
+        #Reset monthly lottery table
+        addresses = db.session.query(Lottery)
+        addresses.delete()
+        db.session.commit()
 
-    # If there is no participant to the winner, the task is ended
-    if len(list_participant) == 0:
-        return 0
+        if len(list_participant) == 0:
+            return 0
 
-    # Extract a random winner
-    winner = randint(0,len(list_participant)-1)
-    print("winner: " + str(winner))
+        # Extract a random winner
+        winner = randint(0,len(list_participant)-1)
+        print("winner: " + str(winner))
 
-    winner = list_participant[winner]
-    
-    # Increment user points
-    user_winner = db.session.query(User).filter(User.id == winner)
-    user_winner.first().lottery_points += 1
-    db.session.commit()
+        winner = list_participant[winner]
+        
+        # Increment user points
+        user_winner = db.session.query(User).filter(User.id == winner)
+        user_winner.first().lottery_points += 1
+        db.session.commit()
 
-    # Send mail to all participants to show the winner
-    nickname_winner = user_winner.first().nickname
+        # Send mail to all participants to show the winner
+        nickname_winner = user_winner.first().nickname
 
-    email_user_list = []
-    for item in list_participant:
-        participant = db.session.query(User).filter(User.id == item)
-        email_user_list.append(participant.first().email)
-    send_mail_lottery(email_user_list,nickname_winner)
+        email_user_list = []
+        for item in list_participant:
+            participant = db.session.query(User).filter(User.id == item)
+            email_user_list.append(participant.first().email)
+        send_mail_lottery(email_user_list,nickname_winner)
 
 
 if __name__ == '__main__':

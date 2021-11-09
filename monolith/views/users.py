@@ -265,7 +265,8 @@ def profile():
                     user_to_modify.lastname = request.form['surname']
                     user_to_modify.date_of_birth = datetime.datetime.fromisoformat(request.form['birthday'])
                     user_to_modify.location = request.form['location']
-                    user_to_modify.password = generate_password_hash(request.form['new_password'])
+                    if request.form['new_password']:
+                        user_to_modify.password = generate_password_hash(request.form['new_password'])
                     db.session.commit()
                     print("info changed")
                 else:
@@ -313,29 +314,29 @@ def inbox():
         messages if the user is lottery winner
     '''
     if current_user is not None and hasattr(current_user, 'id'):
-        # WITHDRAW MESSAGE (LOTTERY POINT)
-        if request.args.get("lottery") :
-            if current_user.lottery_points >= POINT_NECESSARY:
-                # azzera punti della lotteria
-                current_user.lottery_points -= POINT_NECESSARY
+        # # WITHDRAW MESSAGE (LOTTERY POINT)
+        # if request.args.get("lottery") :
+        #     if current_user.lottery_points >= POINT_NECESSARY:
+        #         # azzera punti della lotteria
+        #         current_user.lottery_points -= POINT_NECESSARY
 
-                # prendi un messaggio destinato all'utente corrente e cambia la data di invio
-                _lotteryMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date>datetime.datetime.today()).filter(Message.deleted==False)
-                lotMsg = _lotteryMessages.all()
-                if lotMsg:
-                    randIndex = randint(0,len(lotMsg)-1)
-                    lotMsg = _lotteryMessages.all()[randIndex]
+        #         # prendi un messaggio destinato all'utente corrente e cambia la data di invio
+        #         _lotteryMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date>datetime.datetime.today()).filter(Message.deleted==False)
+        #         lotMsg = _lotteryMessages.all()
+        #         if lotMsg:
+        #             randIndex = randint(0,len(lotMsg)-1)
+        #             lotMsg = _lotteryMessages.all()[randIndex]
                     
-                    # inserire nel body del messaggio la data di invio originaria
-                    lotMsg[0].body = "Predetermined delivery date: {}\n".format(lotMsg[0].delivery_date) + lotMsg[0].body 
-                    lotMsg[0].delivery_date = datetime.datetime.today()
-                    db.session.commit()
-            else:
-                flash("You don't have the necessary point for withdraw a message!")
-                return redirect("/mailbox")
+        #             # inserire nel body del messaggio la data di invio originaria
+        #             lotMsg[0].body = "Predetermined delivery date: {}\n".format(lotMsg[0].delivery_date) + lotMsg[0].body 
+        #             lotMsg[0].delivery_date = datetime.datetime.today()
+        #             db.session.commit()
+        #     else:
+        #         flash("You don't have the necessary point for withdraw a message!")
+        #         return redirect("/mailbox")
             
             
-        _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
+        _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id).filter(Message.deleted==False)
         _filter_word = db.session.query(Filter_list).filter(Filter_list.user_id == current_user.id)
         _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today()).filter(Message.deleted==False)
         _draftMessage = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == True).filter(Message.receiver_id==User.id)
@@ -362,20 +363,30 @@ def inbox():
 @users.route("/message/<id>", methods=["GET", "POST"])
 def message_view(id):
     deletion = request.args.get("delete")
+    lottery = request.args.get("lottery")
     print(deletion)
     if current_user is not None and hasattr(current_user, 'id'):
         if deletion != None and deletion:
-            query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id).filter(Message.deleted==False)
-            if query.first() != None:
-                message=query.first()
-                if (not message[0].receiver_id == current_user.id) or (message[0].delivery_date>datetime.datetime.today()):
-                    return 'You can\'t delete this message!'
-                else:
+            if lottery and current_user.lottery_points >= POINT_NECESSARY:
+                query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id).filter(Message.deleted==False)
+                if query.first() != None:
+                    message=query.first()
+                    current_user.lottery_points -= POINT_NECESSARY
                     message[0].deleted=True
                     db.session.commit()
-                    return 'Message deleted!'
+                    return redirect("/mailbox")
             else:
-                return 'You can\'t delete this message!'
+                query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id).filter(Message.deleted==False)
+                if query.first() != None:
+                    message=query.first()
+                    if (not message[0].receiver_id == current_user.id) or (message[0].delivery_date>datetime.datetime.today()):
+                        return 'You can\'t delete this message!'
+                    else:
+                        message[0].deleted=True
+                        db.session.commit()
+                        return 'Message deleted!'
+                else:
+                    return 'You can\'t delete this message!'
         else:
             # Received messages
             query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.deleted==False)
@@ -448,3 +459,14 @@ def lottery():
                 return render_template("lottery.html", is_partecipating = is_partecipating)
     else:
         return redirect('/login') 
+
+@users.route("/delete_messages", methods=["GET","POST"])
+def delete_message():
+    if current_user is not None and hasattr(current_user, 'id'):
+        if current_user.lottery_points >= POINT_NECESSARY:
+            _futureMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.delivery_date>datetime.datetime.today()).filter(Message.deleted==False).filter(Message.receiver_id==User.id)
+            return render_template("delete_messages.html", futureMessages = _futureMessages.all())
+        else:
+            return redirect('/mailbox')
+    else:
+        return redirect('/login')     

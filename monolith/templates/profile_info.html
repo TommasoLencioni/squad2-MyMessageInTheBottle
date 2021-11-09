@@ -1,55 +1,50 @@
 {% extends "base.html" %}
 {% block title %}Profile{% endblock %}
 {% block content %}
-<div class="row">
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body" style="margin-left: 20px;">
-            <div class="card-header"><h1>Profile Info:</h1></div>
-            <div style="padding: 40px; margin-bottom: 57px;">
-                  <table style="width:100%">
-                        <tr>
-                          <th>Name:</th>
-                          <td>{{ current_user.firstname }}</td>
-                        </tr>
-                        <tr>
-                          <th>Surname:</th>
-                          <td>{{ current_user.lastname }}</td>
-                        </tr>
-                        <tr>
-                          <th>Email:</th>
-                          <td>{{ current_user.email }}</td>
-                        </tr>
-                        <tr>
-                          <th>Birthday:</th>
-                          <td>{{ current_user.date_of_birth }}</td>
-                        </tr>
-                        <tr>
-                          <th>Location:</th>
-                          <td>{{ current_user.location }}</td>
-                        </tr>
-                        <tr>
-                          <th>Nickname:</th>
-                          <td>{{ current_user.nickname }}</td>
-                        </tr>                      
-                  </table>
-                  <form action="" method="POST" name="filter">
-                        <br>
-                        <br>
-                        <h2>Word filter:</h2>
-                        <h5>(insert words separated by commas)</h5>
-                        <input type="text" id="filter" name="filter" value="{{user_filter_list}}">
-                        <br>
-                        <br>
-                        <input type="submit" class="btn btn-primary" value="Submit">
-                        <br>
-                        <br>
-                        <br>
-                  </form>
-            </div>
-          </div>
-        </div>
-      </div>
+      <br>
+      <h2>Info</h2>
+      <h5> firstname : </h5> {{ current_user.firstname }}
+      <h5> surname : </h5>  {{ current_user.lastname }}
+      <h5> email : </h5> {{ current_user.email }}
+      <h5> birthday : </h5> {{ current_user.date_of_birth }}
+      <h5> location : </h5> {{ current_user.location }}
+      <h5> nickname : </h5> {{ current_user.nickname }}
+      <h5>points: </h5> {{current_user.lottery_points}}
+      {% if current_user.lottery_points > 0 %}
+            <input type=submit name="submit_button" value='withdraw_message' onclick='
+                  window.location.href = `/delete_messages`;' />
+      {% endif %}
+
+      <br><br><br>
+      <h2>Change Info:</h2>
+      <form action="" method="POST" name="change_info">
+            <h5> firstname : </h5>
+            <input type="text" id="firstname" name="firstname" value="{{current_user.firstname}}">
+            <h5> surname : </h5>
+            <input type="text" id="lastname" name="surname" value="{{current_user.lastname}}">
+            <h5> birthday : </h5>
+            <input type="text" id="birthday" format="%d/%m/%Y" name="birthday" value="{{current_user.date_of_birth}}">
+            <h5> location : </h5>
+            <input type="text" id="location" name="location" value="{{current_user.location}}">
+            <h5> new password (if you want): </h5>
+            <input type="text" id="new_password" name="new_password" value="">
+            <h5> Confirm password (for commit change) : </h5>
+            <input type="text" id="old_password" name="old_password" value="">
+            <br><br>
+            <input type="submit" value="change_info">
+      </form>
+      <form action="" method="POST" name="filter">
+            <br>
+            <br>
+            <h2>Word filter:</h2>
+            <input type="text" id="filter" name="filter" value="{{user_filter_list}}">
+            <br>
+            <br>
+            <input type="submit" value="Submit">
+      </form>
+{% endblock %}
+
+
 
       <div class="col-sm-6">
         <div class="card">
