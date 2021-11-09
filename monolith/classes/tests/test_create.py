@@ -10,6 +10,7 @@ import unittest
 import json
 from monolith.database import BlackList, Filter_list, Message, ReportList
 import os
+import io
 
 from monolith.views.tasks import check
 
@@ -310,27 +311,95 @@ class Test(unittest.TestCase):
                 'email': 'email5',
                 'password': 'pass5'
             }
-            print('ora')
             r_login = app2.post(URL_login, data=payload_login)
             URL = '/send'
+            file_name="fake-text-stream.txt"
             payload = {
-                'recipient': 'nick1',
-                'body': 'ciao nick1',
+                'recipient' : 'nick1',
+                'body' : 'ciao nick1',
                 'delivery_date' : '7/11/2021',
+                "image_file" : (io.BytesIO(b"some initial text data"), file_name),
                 'submit_button' : 'Send',
-                'image_file' :  ''
             }
-            print('prima')
-            # file = {'image_file': ''}
             r = app2.post(URL, data=payload)
-            print(r.response)
-            print(r.get_data)
-            print(r.status_code)
-            print("qui")
             nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
             nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
             message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1").first()
             assert message_check is not None
+
+#1bis) send email without recipient
+    def test_send_email_without_recipient(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/send'
+            file_name="fake-text-stream.txt"
+            payload = {
+                'body' : 'ciao nick1',
+                'delivery_date' : '7/11/2021',
+                "image_file" : (io.BytesIO(b"some initial text data"), file_name),
+                'submit_button' : 'Send',
+            }
+            r = app2.post(URL, data=payload)
+            assert r.status_code == 200
+
+#1bisbis) message send without date
+    def test_send_email_without_date(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/send'
+            file_name="fake-text-stream.txt"
+            payload = {
+                'recipient' : 'nick1',
+                'body' : 'ciao nick1 senza data',
+                "image_file" : (io.BytesIO(b"some initial text data"), file_name),
+                'submit_button' : 'Send',
+            }
+            r = app2.post(URL, data=payload)
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
+            message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 senza data").first()
+            assert message_check is not None
+
+#1bisbisbis) send email get
+    def test_send_email_get(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/send'
+            r = app2.get(URL)
+            assert r.status_code == 200
+
+#test draft_id
+
+    def test_send_email_get_draft_id(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/send?draft_id=1&reply=True&reciever=1'
+            r = app2.get(URL)
+            assert r.status_code == 200
 
 #2) send email to multiple user
     def test_send_email_multiple_users(self):
@@ -343,19 +412,18 @@ class Test(unittest.TestCase):
             }
             r_login = app2.post(URL_login, data=payload_login)
             URL = '/send'
+            file_name="fake-text-stream.txt"
             payload = {
                 'recipient': ['nick1','nick2'],
                 'body' : 'ciao nick1 e nick2',
-                'delivery_date': '7/11/2021',
-                'submit_button': 'Send',
+                'delivery_date' : '7/11/2021',
+                "image_file" : (io.BytesIO(b"some initial text data"), file_name),
+                'submit_button' : 'Send',
             }
-            file = {'image_file': ''}
             r = app2.post(URL, data=payload)
             nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
             nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
             nick2 = db.session.query(User).filter(User.nickname=="nick2").first()
-            print(nick1.id)
-            print(nick2.id)
             message_check_nick1=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 e nick2").first()
             message_check_nick2=db.session.query(Message).filter(Message.receiver_id==nick2.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 e nick2").first()
             assert message_check_nick1 is not None and message_check_nick2 is not None
@@ -372,17 +440,16 @@ class Test(unittest.TestCase):
             print('ora')
             r_login = app2.post(URL_login, data=payload_login)
             URL = '/send'
+            file_name="fake-text-stream.txt"
             payload = {
-                'recipient': 'nick1',
-                'body': 'ciao nick1',
-                'delivery_date': '7/11/2021',
-                'submit_button': 'Save as Draft',
+                'recipient' : 'nick1',
+                'body' : 'ciao nick1',
+                'delivery_date' : '7/11/2021',
+                "image_file" : (io.BytesIO(b"some initial text data"), file_name),
+                'submit_button' : 'Save as draft',
             }
-            print('prima')
-            file = {'image_file': ''}
             r = app2.post(URL, data=payload)
             print(r.status_code)
-            print("qui")
             nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
             nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
             message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.is_draft==True).first()
@@ -400,19 +467,18 @@ class Test(unittest.TestCase):
             }
             r_login = app2.post(URL_login, data=payload_login)
             URL = '/send'
+            file_name="fake-text-stream.txt"
             payload = {
                 'recipient': ['nick1','nick2'],
                 'body' : 'ciao nick1 e nick2',
-                'delivery_date': '7/11/2021',
-                'submit_button': 'Save as draft',
+                'delivery_date' : '7/11/2021',
+                "image_file" : (io.BytesIO(b"some initial text data"), file_name),
+                'submit_button' : 'Save as draft',
             }
-            file = {'image_file': ''}
             r = app2.post(URL, data=payload)
             nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
             nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
             nick2 = db.session.query(User).filter(User.nickname=="nick2").first()
-            print(nick1.id)
-            print(nick2.id)
             message_check_nick1=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 e nick2").filter(Message.is_draft==True).first()
             message_check_nick2=db.session.query(Message).filter(Message.receiver_id==nick2.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 e nick2").filter(Message.is_draft==True).first()
             assert message_check_nick1 is not None and message_check_nick2 is not None
@@ -457,6 +523,112 @@ class Test(unittest.TestCase):
             test_blacklist_removed = db.session.query(BlackList).filter(BlackList.id==nick1.id).filter(BlackList.blacklisted_user_id==nick5.id).first()
             assert message_check is None and test_blacklist_removed is None
             
+#7)test send as message
+    def test_send_email_send_as_message(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            draft_id =  db.session.query(Message).filter(Message.is_draft==True).first().message_id
+            print(draft_id)
+            URL = '/send?draft_id='
+            file_name="fake-text-stream.txt"
+            payload = {
+                'recipient' : 'nick1',
+                'body' : 'ciao nick1 send as message',
+                'delivery_date' : '7/11/2021',
+                "image_file" : (io.BytesIO(b"some initial text data"), file_name),
+                'submit_button' : 'Send as message',
+            }
+            r = app2.post(URL+str(draft_id), data=payload)
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
+            message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 send as message").first()
+            assert message_check is not None
+
+#7bis) send as message without date
+    def test_send_email_send_as_message_without_date(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            draft_id =  db.session.query(Message).filter(Message.is_draft==True).first().message_id
+            print(draft_id)
+            URL = '/send?draft_id='
+            file_name="fake-text-stream.txt"
+            payload = {
+                'recipient' : 'nick1',
+                'body' : 'ciao nick1 send as message without date',
+                "image_file" : (io.BytesIO(b"some initial text data"), file_name),
+                'submit_button' : 'Send as message',
+            }
+            r = app2.post(URL+str(draft_id), data=payload)
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
+            message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 send as message without date").first()
+            assert message_check is not None
+
+
+#8) email save changes
+    def test_send_email_save_changes(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            draft_id =  db.session.query(Message).filter(Message.is_draft==True).first().message_id
+            print(draft_id)
+            URL = '/send?draft_id='
+            file_name="fake-text-stream.txt"
+            payload = {
+                'recipient' : 'nick1',
+                'body' : 'ciao nick1 save changes',
+                'delivery_date' : '7/11/2021',
+                "image_file" : (io.BytesIO(b"some initial text data"), file_name),
+                'submit_button' : 'Save changes',
+            }
+            r = app2.post(URL+str(draft_id), data=payload)
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
+            message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 save changes").first()
+            assert message_check is not None
+
+#8) email save changes without date
+    def test_send_email_save_changes_without_date(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            draft_id =  db.session.query(Message).filter(Message.is_draft==True).first().message_id
+            print(draft_id)
+            URL = '/send?draft_id='
+            file_name="fake-text-stream.txt"
+            payload = {
+                'recipient' : 'nick1',
+                'body' : 'ciao nick1 save changes without date',
+                "image_file" : (io.BytesIO(b"some initial text data"), file_name),
+                'submit_button' : 'Save changes',
+            }
+            r = app2.post(URL+str(draft_id), data=payload)
+            nick5 = db.session.query(User).filter(User.nickname=="nick5").first()
+            nick1 = db.session.query(User).filter(User.nickname=="nick1").first()
+            message_check=db.session.query(Message).filter(Message.receiver_id==nick1.id).filter(Message.sender_id==nick5.id).filter(Message.body=="ciao nick1 save changes without date").first()
+            assert message_check is not None
 
 #test profile
 
@@ -684,6 +856,7 @@ class Test(unittest.TestCase):
             URL = '/'
             r = app2.get(URL)
             assert r.status_code == 302
+
 #2) home without login
     def test_home_without_login(self):
         with app.app_context():
@@ -700,13 +873,53 @@ class Test(unittest.TestCase):
             check("test")
             test("test")
             add(5, 1)
-            #create_task("ciao")
             assert True
 
 # test calendar
+
+#1)calendar
     def test_calendar(self):
         with app.app_context():
             app2=TestedApp.test_client()
             URL = '/calendar'
+            r = app2.get(URL)
+            assert r.status_code == 302
+
+#2)test calendar without login
+
+    def test_calendar_without_login(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/calendar'
+            r = app2.get(URL)
+            assert r.status_code == 200
+
+#test mailbox
+
+#1) mailbox
+    def test_mailbox(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL_login = '/login'
+            payload_login = {
+                'email': 'email5',
+                'password': 'pass5'
+            }
+            r_login = app2.post(URL_login, data=payload_login)
+            URL = '/mailbox'
+            r = app2.get(URL)
+            assert r.status_code == 200
+
+#2) mailbox without login
+    def test_mailbox_without_login(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            URL = '/mailbox'
             r = app2.get(URL)
             assert r.status_code == 302
