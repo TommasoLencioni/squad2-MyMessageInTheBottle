@@ -3,14 +3,24 @@
 {% block content %}
 <html>
     <body>
-        <h1>Lottery</h1>
-        <form action="" method="POST">
-            {% if is_partecipating == 1 %}
-                <div>YOU'RE ALREADY A CONTESTANT!</div>
-            {%else%}
-                    <input class="btn btn-danger" type=submit name="submit_button" value='JOIN' onclick='alert("PARTECIPATING!!")' />
-            {% endif %}
-        </form>
+
+        <div class="card text-center">
+            <div class="card-header">
+                <h1>Lottery</h1>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% if is_partecipating == 1 %}
+                        <div>YOU'RE ALREADY A CONTESTANT!</div>
+                    {%else%}
+                            <input class="btn btn-danger" type=submit name="submit_button" value='JOIN' onclick='alert("PARTECIPATING!!")' />
+                    {% endif %}
+                </form>
+            </div>
+            <div class="card-footer text-muted">
+              You can participate for the lottery only once in a month!
+            </div>
+        </div>
     </body>
 </html>
 {% endblock %}

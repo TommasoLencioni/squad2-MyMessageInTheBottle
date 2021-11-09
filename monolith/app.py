@@ -58,9 +58,10 @@ def create_app():
 
     # create a first admin user with default parameter
     with app.app_context():
-        q = db.session.query(User).filter(User.email == 'example@example.com')
+        q = db.session.query(User).filter(User.email == 'admin@example.com')
+        d = db.session.query(User).filter(User.email != 'admin@example.com').count()
         user = q.first()
-        if user is None:
+        if user is None and d==0:
             example = User()
             example.firstname = 'Admin'
             example.lastname = 'Admin'
