@@ -1,18 +1,10 @@
-from re import T, U
-import unittest
-import requests
-from celery import Celery
-from sqlalchemy.sql.expression import true
 from monolith.app import *
 from monolith.app import app as TestedApp
-from monolith.views.tasks import *
 import unittest
-import json
 from monolith.database import BlackList, Filter_list, Message, ReportList
 import os
 import io
 
-from monolith.views.tasks import check
 
 LOGIN_OK = 200
 LOGIN_FAIL = 201
@@ -864,16 +856,6 @@ class Test(unittest.TestCase):
             URL = '/'
             r = app2.get(URL)
             assert r.status_code == 302
-
-#test task
-
-    def test_task(self):
-        with app.app_context():
-            app2=TestedApp.test_client()
-            check("test")
-            test("test")
-            add(5, 1)
-            assert True
 
 # test calendar
 

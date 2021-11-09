@@ -3,7 +3,6 @@ from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired
 from datetime import date
 
-from monolith.database import User, db, Message
 
 class LoginForm(FlaskForm):
     email = f.StringField('email', validators=[DataRequired()], render_kw={"placeholder": "email"})
@@ -22,7 +21,6 @@ class UserForm(FlaskForm):
     display = ['email', 'firstname', 'lastname', 'password', 'date_of_birth','nickname','location']
 
     def validate_on_submit(self):
-            #result = super(UserForm, self).validate()
             if (self.date_of_birth.data is not None and self.date_of_birth.data>date.today()):
                 return False
             else:
@@ -36,7 +34,3 @@ class SendForm(FlaskForm):
     send_button = f.SubmitField('send')
     draft_button = f.SubmitField('save as draft')
     display = ['body', 'delivery_date']
-    #display = ['body', 'delivery_date']
-
-    #def validate_on_submit_2(self):
-    #      return super(SendForm, self).validate()

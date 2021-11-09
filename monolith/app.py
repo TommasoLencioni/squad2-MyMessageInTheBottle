@@ -1,11 +1,10 @@
 import datetime
-
 from flask import Flask
-
 from monolith.auth import login_manager
 from monolith.database import User, db
 from monolith.views import blueprints
 from celery import Celery
+
 
 def make_celery(app):
     celery = Celery(
@@ -22,6 +21,7 @@ def make_celery(app):
 
     celery.Task = ContextTask
     return celery
+
 
 def create_app():
     app = Flask(__name__)

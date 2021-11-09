@@ -16,7 +16,6 @@ from monolith.database import BlackList, ReportList, User, db, Message, Filter_l
 from monolith.forms import UserForm, SendForm
 from monolith.auth import current_user
 
-from .tasks import create_task
 
 users = Blueprint('users', __name__)
 
