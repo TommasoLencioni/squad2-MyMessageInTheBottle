@@ -10,7 +10,6 @@ from celery.schedules import crontab
 from random import randint
 
 
-
 def make_celery(app):
     '''
         Function for create Celery instance 
