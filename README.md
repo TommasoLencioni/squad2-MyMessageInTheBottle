@@ -1,5 +1,8 @@
 # My Message in the Bottle
 
+[![Build Status](https://app.travis-ci.com/TommasoLencioni/calc.svg?branch=main)](https://app.travis-ci.com/TommasoLencioni/calc)
+[![Coverage Status](https://coveralls.io/repos/github/TommasoLencioni/squad2-MyMessageInTheBottle/badge.svg?branch=main)](https://coveralls.io/github/TommasoLencioni/squad2-MyMessageInTheBottle?branch=main)
+
 This is the source code of MyMessageInTheBottle application, a
 project of *Advanced Software Engineering* course,
 University of Pisa.
@@ -7,7 +10,7 @@ University of Pisa.
 ## Team info
 
 - Squad 2
-- The *team leader* is *To be decided*
+- The *team leader* is *Gabriele Sipione*
 
 #### Members
 
@@ -15,7 +18,7 @@ University of Pisa.
 |------------------|-------------------------------|
 |Tommaso Lencioni  |t.lencioni1@studenti.unipi.it  |
 |Leonardo Talerico |l.talerico@studenti.unipi.it   |
-|Gabriele Sipione  |@studenti.unipi.it             |
+|Gabriele Sipione  |g.sipione@studenti.unipi.it    |
 |Usman Shahzad     |u.shahzad1@studenti.unipi.it   |
 |Filippo           |f.dolente@studenti.unipi.it    |
 
