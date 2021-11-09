@@ -307,12 +307,6 @@ def inbox():
     else:
         return redirect('/login')
 
-@users.route("/tasks", methods=["POST", "GET"])
-def run_task():
-    task = create_task.delay(int(5))
-    task.wait()
-    return({"value":"done"})
-
 @users.route("/message/<id>", methods=["GET", "POST"])
 def message_view(id):
     deletion = request.args.get("delete")
