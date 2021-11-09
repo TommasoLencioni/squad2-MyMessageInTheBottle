@@ -6,7 +6,7 @@ from types import MethodDescriptorType
 from flask.helpers import flash
 from sqlalchemy import select
 import datetime
-from flask import Flask,Blueprint, blueprints, redirect, render_template, request, abort
+from flask import Flask, Blueprint, blueprints, redirect, render_template, request, flash
 from flask_login import current_user, logout_user
 from sqlalchemy.orm import query
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -40,13 +40,11 @@ def _users():
                 
                 _list = db.session.query(BlackList).filter(BlackList.user_id==new_blackList.user_id).filter(BlackList.blacklisted_user_id==new_blackList.blacklisted_user_id)
                 if _list.first() is not None:
-                    print("Already in blacklist")
+                    print("blacklist already exist")
                 else:
                     db.session.add(new_blackList)
                     db.session.commit()
-                    print("Added to the blacklist")
-            
-            # remove user from the blacklist
+                    print("blacklist add")
             elif request.args.get("block") == "0":
                 blacklist_id = db.session.query(BlackList).filter(BlackList.user_id==new_blackList.user_id).filter(BlackList.blacklisted_user_id==new_blackList.blacklisted_user_id)
                 if blacklist_id.first() is not None:
@@ -79,26 +77,26 @@ def create_user():
     form = UserForm()
     if not (current_user is not None and hasattr(current_user, 'id')):
         if request.method == 'POST':
-            if form.validate_on_submit():
-                email_exist_control = db.session.query(User).filter(User.email==form.email.data)
-                if email_exist_control.first() is not None:
-                    return render_template('create_user.html', form=form)
-                nick_exist_control = db.session.query(User).filter(User.nickname==form.nickname.data)
-                if nick_exist_control.first() is not None:
-                    return render_template('create_user.html', form=form)
-                new_user = User()
-                form.populate_obj(new_user)
-                """
-                Password should be hashed with some salt. For example if you choose a hash function x, 
-                where x is in [md5, sha1, bcrypt], the hashed_password should be = x(password + s) where
-                s is a secret key.
-                """
-                new_user.set_password(form.password.data)
-                db.session.add(new_user)
-                db.session.commit()
-                return redirect('/users')
-            else:
-                return render_template('create_user.html', form=form, fail_date=True)
+            email_exist_control = db.session.query(User).filter(User.email==form.email.data)
+            if email_exist_control.first() is not None:
+                #return render_template('create_user.html', form=form)
+                flash("This email is already registered, please try another!")
+                return redirect("/create_user")
+            nick_exist_control = db.session.query(User).filter(User.nickname==form.nickname.data)
+            if nick_exist_control.first() is not None:
+                flash("This nickname is not available, please try another!")
+                return redirect("/create_user")
+            new_user = User()
+            form.populate_obj(new_user)
+            """
+            Password should be hashed with some salt. For example if you choose a hash function x, 
+            where x is in [md5, sha1, bcrypt], the hashed_password should be = x(password + s) where
+            s is a secret key.
+            """
+            new_user.set_password(form.password.data)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect('/users')
         elif request.method == 'GET':
             return render_template('create_user.html', form=form)
         else:
@@ -189,9 +187,7 @@ def send():
                     db.session.add(draft_message)
             db.session.commit()
             q = db.session.query(User).filter(User.id == current_user.id)
-            #TODO blacklist
             user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)
-            #print(user_list.all())
             new_user_list=[]
             for elem in user_list.all():
                 new_user_list.append(str(elem).replace('(','').replace('\'', '').replace(')','').replace(',',''))
@@ -205,7 +201,6 @@ def send():
     elif request.method == 'GET':
         if current_user is not None and hasattr(current_user, 'id'):
             form.body.data=draftBody
-            print('Sono vivo')
             user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)
             new_user_list=[]
             for elem in user_list.all():
@@ -363,7 +358,6 @@ def inbox():
             return render_template("mailbox.html", messages=_recMessages.all(), sendMessages=_sentMessages.all(), draftMessages=_draftMessage.all())
     else:
         return redirect('/login')
-
 
 @users.route("/message/<id>", methods=["GET", "POST"])
 def message_view(id):

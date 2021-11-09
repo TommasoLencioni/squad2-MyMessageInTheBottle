@@ -10,6 +10,7 @@ from celery.schedules import crontab
 from random import randint
 
 
+
 def make_celery(app):
     '''
         Function for create Celery instance 
@@ -28,6 +29,7 @@ def make_celery(app):
 
     celery.Task = ContextTask
     return celery
+
 
 def create_app():
     '''

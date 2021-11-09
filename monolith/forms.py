@@ -3,7 +3,6 @@ from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired
 from datetime import date
 
-from monolith.database import User, db, Message
 
 # Contains fields for the login form
 class LoginForm(FlaskForm):

@@ -97,6 +97,15 @@ margin-left: 4px;
         <div class="card">
           <div class="card-header">
             <h3>Create User</h3>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <ul style="color: white" class=flashes>
+                  {% for message in messages %}
+                    <li>{{ message }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}  
           </div>
           <div class="card-body">
             <form action="" method="POST">

@@ -1,36 +1,23 @@
-import json
+#test
 import unittest
-from monolith.app import app as tested_app
-from monolith.views import auth
-from monolith.forms import LoginForm
+from monolith.auth import *
+from monolith.app import *
+from monolith.app import app as TestedApp
+import unittest
+import json
 
-class TestApp(unittest.TestCase):
+class TestAuth(unittest.TestCase):
 
-    '''This test should be a successful one but there are auth problems
-    def testlogin(self):  #Test admin login
-        app = tested_app.test_client()
-        data = {
-                'email': 'firstmail',
-                'password': 'pass1'
-            }
-        response = app.post(
-            "/login",data=data
-        )
-        self.assertEqual(response.status_code, 302)
-    '''
+#1) load user test
+    def test_load_user_exists(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            user = load_user(1)
+            assert user is not None
 
-    #Even this test doesn't respect the POST condition of login but it simply returns status code 200 with no login 
-    def test_fail_login(self):  #Test admin login
-        app = tested_app.test_client()
-        data = {
-                "email": "user1", 
-                "password": "uncorrectpass", 
-            }
-        response = app.post(
-            "/login",
-            data=json.dumps(data),
-            headers={"Content-Type": "application/json"},
-        )
-        # no loaded parties
-        #body = json.loads(str(response.data, 'utf8'))
-        self.assertEqual(response.status_code, 200)
+#2) load unexist user test
+    def test_load_user_not_exists(self):
+        with app.app_context():
+            app2=TestedApp.test_client()
+            user = load_user(999)
+            assert user is None
