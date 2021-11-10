@@ -41,12 +41,22 @@ def create_app():
     app.config['SECRET_KEY'] = 'ANOTHER ONE'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../mmiab.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['MAIL_SERVER']='smtp.gmail.com'
-    app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USERNAME'] = 'asemmib5@gmail.com'
-    app.config['MAIL_PASSWORD'] = 'qwertyuiop@1234'
+
+    # MailTrap Configuration
+    app.config['MAIL_SERVER'] = 'smtp.mailtrap.io'
+    app.config['MAIL_PORT'] = 2525
+    app.config['MAIL_USERNAME'] = '0aac816f5c6371'
+    app.config['MAIL_PASSWORD'] = '4e5007c7bdbcaa'
     app.config['MAIL_USE_TLS'] = True
     app.config['MAIL_USE_SSL'] = False
+
+    # Gmail Configuration
+    #app.config['MAIL_SERVER']='smtp.gmail.com'
+    #app.config['MAIL_PORT'] = 587
+    #app.config['MAIL_USERNAME'] = 'asemmib5@gmail.com'
+    #app.config['MAIL_PASSWORD'] = 'qwertyuiop@1234'
+    #app.config['MAIL_USE_TLS'] = True
+    #app.config['MAIL_USE_SSL'] = False
 
     for bp in blueprints:
         app.register_blueprint(bp)
