@@ -190,7 +190,7 @@ def send():
             return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS, is_submitted=True)
         
     else:
-        #show the form and fill it if it's to modifya draft message
+        #show the form and fill it if it's to modify a draft message
         if current_user is not None and hasattr(current_user, 'id'): #check if the user is logged
             form.body.data=draftBody
             user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)
@@ -306,28 +306,6 @@ def inbox():
         messages if the user is lottery winner
     '''
     if current_user is not None and hasattr(current_user, 'id'): #check if the user is logged
-        # # WITHDRAW MESSAGE (LOTTERY POINT)
-        # if request.args.get("lottery") :
-        #     if current_user.lottery_points >= POINT_NECESSARY:
-        #         # azzera punti della lotteria
-        #         current_user.lottery_points -= POINT_NECESSARY
-
-        #         # prendi un messaggio destinato all'utente corrente e cambia la data di invio
-        #         _lotteryMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date>datetime.datetime.today()).filter(Message.deleted==False)
-        #         lotMsg = _lotteryMessages.all()
-        #         if lotMsg:
-        #             randIndex = randint(0,len(lotMsg)-1)
-        #             lotMsg = _lotteryMessages.all()[randIndex]
-                    
-        #             # inserire nel body del messaggio la data di invio originaria
-        #             lotMsg[0].body = "Predetermined delivery date: {}\n".format(lotMsg[0].delivery_date) + lotMsg[0].body 
-        #             lotMsg[0].delivery_date = datetime.datetime.today()
-        #             db.session.commit()
-        #     else:
-        #         flash("You don't have the necessary point for withdraw a message!")
-        #         return redirect("/mailbox")
-            
-            
         _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id).filter(Message.deleted==False)
         _filter_word = db.session.query(Filter_list).filter(Filter_list.user_id == current_user.id)
         _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today()).filter(Message.deleted==False)
