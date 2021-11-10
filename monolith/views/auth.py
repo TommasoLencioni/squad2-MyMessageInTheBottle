@@ -11,7 +11,8 @@ LOGIN_OK = 200
 LOGIN_FAIL = 201
 DOUBLE_LOGIN = 202
 
-
+#This is the route to do the login, in the login.html page there is a form and the information 
+#that are put in the form are cheked in the db and the is_active flag in the db is put equal to True
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if not (current_user is not None and hasattr(current_user, 'id')):
@@ -30,6 +31,7 @@ def login():
     else:
         return "You are currently logged in, you have to <a href=/logout>logout</a> first" , DOUBLE_LOGIN
 
+#This is the route to do the logout, the flag is_active of the use in the db is put equal to False
 @auth.route("/logout")
 def logout():
     if current_user is not None and hasattr(current_user, 'id'):

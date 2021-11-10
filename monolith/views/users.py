@@ -21,43 +21,47 @@ POINT_NECESSARY = 12
 
 users = Blueprint('users', __name__)
 
+#This is the route to see all the user that are registered adn to see who is online
 @users.route('/users')
 def _users():
     '''
         Show a list of the online and offline users registered to MessageInABottle.
         Also provide the functionality for block and report a user.
     '''
-    if current_user is not None and hasattr(current_user, 'id'):
+    if current_user is not None and hasattr(current_user, 'id'): #check if the user is logged
         new_blackList = BlackList()
         new_reportlist = ReportList()
         new_blackList.user_id = current_user.id
-        new_blackList.blacklisted_user_id = request.args.get("block_user_id")
+        new_blackList.blacklisted_user_id = request.args.get("block_user_id") #is the id of the user that he wants to block (it could be put in the URL)
 
-        if new_blackList.blacklisted_user_id is not None:
+        if new_blackList.blacklisted_user_id is not None: #chek if in the URL there is the id of the user to block
             
             # put user in the blacklist
-            if request.args.get("block") == "1":
+            if request.args.get("block") == "1": #is a parameter thar could be in the URL to identify the blacklist action
                 
                 _list = db.session.query(BlackList).filter(BlackList.user_id==new_blackList.user_id).filter(BlackList.blacklisted_user_id==new_blackList.blacklisted_user_id)
-                if _list.first() is not None:
+                if _list.first() is not None: #chek if the tupla (current_user.id,user_to_block.id) is just in the db
                     print("blacklist already exist")
                 else:
                     db.session.add(new_blackList)
                     db.session.commit()
                     print("blacklist add")
-            elif request.args.get("block") == "0":
+
+            #remove user from the blacklist
+            elif request.args.get("block") == "0": 
                 blacklist_id = db.session.query(BlackList).filter(BlackList.user_id==new_blackList.user_id).filter(BlackList.blacklisted_user_id==new_blackList.blacklisted_user_id)
-                if blacklist_id.first() is not None:
+                if blacklist_id.first() is not None: #chek if the tupla (current_user.id,user_to_block.id) is just in the db
                     db.session.query(BlackList).filter(BlackList.id==blacklist_id.first().id).delete()
                     db.session.commit()
                     print("removed from blacklist")
                 else:
                     print("operation not allowed: the user is not in the blacklist")
-            else:
+            #put a user in the reportlist
+            else: 
                 new_reportlist.user_id = current_user.id
                 new_reportlist.reportlisted_user_id = request.args.get("block_user_id")
                 _list = db.session.query(ReportList).filter(ReportList.user_id==new_reportlist.user_id).filter(ReportList.reportlisted_user_id==new_reportlist.reportlisted_user_id)
-                if _list.first() is not None:
+                if _list.first() is not None:  #chek if the tupla (current_user.id,user_to_report.id) is just in the db
                     print("user already reported")
                 else:
                     db.session.add(new_reportlist)
@@ -68,51 +72,39 @@ def _users():
     else:
         return redirect('/login')
 
-
+#This is the route to create a new user
 @users.route('/create_user', methods=['POST', 'GET'])
 def create_user():
     '''
         Create a user
     '''
     form = UserForm()
-    if not (current_user is not None and hasattr(current_user, 'id')):
-        if request.method == 'POST':
+    if not (current_user is not None and hasattr(current_user, 'id')): #check if the user is logged
+        if request.method == 'POST': #take information from the Form
             email_exist_control = db.session.query(User).filter(User.email==form.email.data)
-            if email_exist_control.first() is not None:
-                #return render_template('create_user.html', form=form)
+            if email_exist_control.first() is not None: #check if the email exists 
                 flash("This email is already registered, please try another!")
                 return redirect("/create_user")
             nick_exist_control = db.session.query(User).filter(User.nickname==form.nickname.data)
-            if nick_exist_control.first() is not None:
+            if nick_exist_control.first() is not None: #check if the nickname exists
                 flash("This nickname is not available, please try another!")
                 return redirect("/create_user")
             new_user = User()
             form.populate_obj(new_user)
-            """
-            Password should be hashed with some salt. For example if you choose a hash function x, 
-            where x is in [md5, sha1, bcrypt], the hashed_password should be = x(password + s) where
-            s is a secret key.
-            """
             new_user.set_password(form.password.data)
             db.session.add(new_user)
             db.session.commit()
             return redirect('/users')
-        elif request.method == 'GET':
+        elif request.method == 'GET': #show the form
             return render_template('create_user.html', form=form)
         else:
             raise RuntimeError('This should not happen!')
     else:
         return "You are currently logged in, you have to <a href=/logout>logout</a> first"  
 
-
+#This is the route to send messages, create drafts, modify draft messages or send them 
 @users.route('/send', methods=['POST', 'GET'])
 def send():
-    '''
-        Send a message to a user.
-        POST:
-        GET:
-    '''
-
     isDraft =False                                                  # The message by default is set as "NOT A DRAFT"
     draftReciever = request.args.get("reciever")                    # take argument "reciever"
     draftBody = request.args.get("body")                            # take argument "body"
@@ -120,26 +112,26 @@ def send():
     draft_id = request.args.get('draft_id')                         # # take argument "draft_id"
     form = SendForm()
     if request.method == 'POST':
-        if form.data is not None and form.data['recipient'] is not None:
+        if form.data is not None and form.data['recipient'] is not None: #check if the receiver is None
             # check for images
             if request.files['image_file'] is not None:
                 image_binary=base64.b64encode(request.files['image_file'].read())
             else:
                 image_binary = ""
-            #check if a buttom is pressed
+            #check if the send or draft buttom is pressed
             if request.form['submit_button'] == "Send" or request.form['submit_button'] == 'Save as draft':
                 if draft_id is not None:
                     draft_message=db.session.query(Message).filter(Message.message_id==draft_id).delete()
-                for nick in form.data['recipient']:
+                for nick in form.data['recipient']: #for each receiver that specified in the form create a message
                     new_message = Message()
                     form.populate_obj(new_message)
                     receiver_id = db.session.query(User).filter(User.nickname == nick)
                     new_message.receiver_id = receiver_id.first().id   
-                    if request.form['submit_button'] == 'Save as draft':
+                    if request.form['submit_button'] == 'Save as draft': #check whitch button is pressed and set the corresponding flag
                         new_message.is_draft = True
                     else:
                         new_message.is_draft = False
-                    if form.data['delivery_date'] is None:
+                    if form.data['delivery_date'] is None: #if no date is specified, the current date is put
                         new_message.delivery_date=date.today()
                     new_message.creation_date=date.today()
                     sender= db.session.query(User).filter(User.id == current_user.id)
@@ -147,8 +139,7 @@ def send():
                     new_message.opened = False
                     new_message.deleted = False
                     _blacklist_control=db.session.query(BlackList).filter(BlackList.user_id==new_message.receiver_id).filter(BlackList.blacklisted_user_id==new_message.sender_id)
-                    if _blacklist_control.first() is not None:
-                        #TODO add visula advice
+                    if _blacklist_control.first() is not None: #check if the user is in the blacklist of the receiver
                         print("blacklist rilevata")
                     else:
                         new_message.image= image_binary.decode('utf-8')
@@ -199,7 +190,8 @@ def send():
             return render_template("send.html",  current_user=current_user, current_user_firstname=q.first().firstname, form=form, user_list=dictUS, is_submitted=True)
         
     else:
-        if current_user is not None and hasattr(current_user, 'id'):
+        #show the form and fill it if it's to modifya draft message
+        if current_user is not None and hasattr(current_user, 'id'): #check if the user is logged
             form.body.data=draftBody
             user_list = db.session.query(User.nickname).filter(User.id != current_user.id).filter(User.is_admin == False)
             new_user_list=[]
@@ -213,12 +205,10 @@ def send():
                 if draftReciever is not None:
                     form.body.data=str(draftReciever)+' wrote:\n'+str(draftBody)+'\n-----------------\n'
 
-            #TODO blacklist
             if draft_id is not None:
                 draft_message=db.session.query(Message).filter(Message.message_id==draft_id).first()
                 form.body.data=draft_message.body
                 form.delivery_date.data=draft_message.delivery_date
-                #form.recipient=db.session.query(User).filter(User.id==draft_message.receiver_id).first().nickname
                 dictUS[db.session.query(User).filter(User.id==draft_message.receiver_id).first().nickname] = 1
 
             q = db.session.query(User).filter(User.id == current_user.id)
@@ -226,7 +216,8 @@ def send():
         else:
             welcome = None
             return redirect('/login')
-  
+
+#This is the route to see user's information, to change it and to add word filter
 @users.route('/profile', methods=['GET','POST'])
 def profile():
     """
@@ -236,15 +227,15 @@ def profile():
         If the user who try to access this service is not logged, will be render in the
         'home' page
     """
-    if current_user is not None and hasattr(current_user, 'id'):
-        if request.method == 'GET':
+    if current_user is not None and hasattr(current_user, 'id'): #check if the user is logged
+        if request.method == 'GET': #chow the form and the info
             user_filter_list = db.session.query(Filter_list).filter(Filter_list.user_id==current_user.id)
             if user_filter_list.first() is not None:
                 return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
             else:
                 return render_template("profile_info.html", current_user=current_user,user_filter_list="")
-        elif request.method == 'POST':
-            if 'filter' in request.form:
+        elif request.method == 'POST': #apply the modification in the form
+            if 'filter' in request.form: #if the user presses the filter button i change the word filter
                 print("change filter branch")
                 new_filter = Filter_list()
                 new_filter.list = request.form['filter']
@@ -257,9 +248,9 @@ def profile():
                     db.session.add(new_filter)
                 db.session.commit()
                 return render_template("profile_info.html", current_user=current_user,user_filter_list=user_filter_list.first().list)
-            else:
+            else: #if the user presses the other button he changes is information with the info in the form
                 print("change info branch")
-                if check_password_hash(current_user.password, request.form['old_password']) :
+                if check_password_hash(current_user.password, request.form['old_password']) : #check if the password that is put in the form is corrected
                     user_to_modify = db.session.query(User).filter(User.id==current_user.id).first()
                     user_to_modify.firstname = request.form['firstname']
                     user_to_modify.lastname = request.form['surname']
@@ -279,20 +270,20 @@ def profile():
     else:
         return redirect('/login')
 
-
+#This route is to delete an account 
 @users.route('/deleteAccount', methods=['POST','GET'])
 def delete_account():
     """
         This funcionality allows user to delete his/her account from MyMessageInTheBottle.
         The function will delete the account only for the logged user, and will redirect in the start page
     """
-    if request.method == 'GET':
+    if request.method == 'GET': #show the form
         if current_user is not None and hasattr(current_user, 'id'):
             return render_template("delete.html")
         else:
             return redirect('/login')
     else:
-        if request.form['confirm_button'] == 'Delete my account':
+        if request.form['confirm_button'] == 'Delete my account': #if confirm_button is pressed the account is deleted (the elimination is done putting True in the is_deleted flag)
             if current_user is not None and hasattr(current_user, 'id'):
                 query = db.session.query(User).filter(User.id == current_user.id)
                 query.first().is_deleted=True
@@ -302,6 +293,7 @@ def delete_account():
         else:
             return redirect('/')
 
+#This route is to see the mailbox
 @users.route('/mailbox', methods=['GET'])
 def inbox():
     '''
@@ -313,7 +305,7 @@ def inbox():
         It also provides the functionality for the user to delete future 
         messages if the user is lottery winner
     '''
-    if current_user is not None and hasattr(current_user, 'id'):
+    if current_user is not None and hasattr(current_user, 'id'): #check if the user is logged
         # # WITHDRAW MESSAGE (LOTTERY POINT)
         # if request.args.get("lottery") :
         #     if current_user.lottery_points >= POINT_NECESSARY:
@@ -341,7 +333,7 @@ def inbox():
         _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today()).filter(Message.deleted==False)
         _draftMessage = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == True).filter(Message.receiver_id==User.id)
         new_rec_list = [] 
-        if _filter_word.first() is not None:
+        if _filter_word.first() is not None: #remove the messages that don't respect the filter word list
             print(_recMessages.all())
             for message in _recMessages.all():
                 print(message)
@@ -460,9 +452,10 @@ def lottery():
     else:
         return redirect('/login') 
 
+#This is the route to delete a message
 @users.route("/delete_messages", methods=["GET","POST"])
 def delete_message():
-    if current_user is not None and hasattr(current_user, 'id'):
+    if current_user is not None and hasattr(current_user, 'id'): #check if the user is logged
         if current_user.lottery_points >= POINT_NECESSARY:
             _futureMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.delivery_date>datetime.datetime.today()).filter(Message.deleted==False).filter(Message.receiver_id==User.id)
             return render_template("delete_messages.html", futureMessages = _futureMessages.all()), 201
