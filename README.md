@@ -1,6 +1,6 @@
 # My Message in the Bottle
 
-[![Build Status](https://app.travis-ci.com/TommasoLencioni/calc.svg?branch=main)](https://app.travis-ci.com/TommasoLencioni/calc)
+[![Build Status](https://app.travis-ci.com/TommasoLencioni/squad2-MyMessageInTheBottle.svg?branch=main)](https://app.travis-ci.com/TommasoLencioni/squad2-MyMessageInTheBottle)
 [![Coverage Status](https://coveralls.io/repos/github/TommasoLencioni/squad2-MyMessageInTheBottle/badge.svg?branch=main)](https://coveralls.io/github/TommasoLencioni/squad2-MyMessageInTheBottle?branch=main)
 
 This is the source code of MyMessageInTheBottle application, a
