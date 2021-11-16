@@ -308,7 +308,7 @@ def inbox():
     if current_user is not None and hasattr(current_user, 'id'): #check if the user is logged
         _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id).filter(Message.deleted==False)
         _filter_word = db.session.query(Filter_list).filter(Filter_list.user_id == current_user.id)
-        _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today()).filter(Message.deleted==False)
+        _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=date.today()).filter(Message.deleted==False)
         _draftMessage = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == True).filter(Message.receiver_id==User.id)
         new_rec_list = [] 
         if _filter_word.first() is not None: #remove the messages that don't respect the filter word list
@@ -349,7 +349,7 @@ def message_view(id):
                 query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id).filter(Message.deleted==False)
                 if query.first() != None:
                     message=query.first()
-                    if (not message[0].receiver_id == current_user.id) or (message[0].delivery_date>datetime.datetime.today()):
+                    if (not message[0].receiver_id == current_user.id) or (message[0].delivery_date>date.today()):
                         return 'You can\'t delete this message!'
                     else:
                         message[0].deleted=True
@@ -362,7 +362,7 @@ def message_view(id):
             query =  db.session.query(Message,User).filter(Message.message_id==id).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.deleted==False)
             if query.first() != None:
                 message=query.first()
-                if message[0].receiver_id == current_user.id and message[0].delivery_date<=datetime.date.today():
+                if message[0].receiver_id == current_user.id and message[0].delivery_date<=date.today():
                     if not message[0].opened:
                         message[0].opened = True
                         db.session.commit()
@@ -386,7 +386,7 @@ def calendar():
     '''
     if current_user is not None and hasattr(current_user, 'id'):
         _sentMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.receiver_id==User.id)
-        _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=datetime.datetime.today()).filter(Message.deleted==False)
+        _recMessages = db.session.query(Message,User).filter(Message.receiver_id == current_user.id).filter(Message.is_draft == False).filter(Message.sender_id==User.id).filter(Message.delivery_date<=date.today()).filter(Message.deleted==False)
 
         # Contains a list of dict [{'todo' : 'Title'}, {'date' : 'date'}, {'msgID' : 'messageID'}]
         events = []
@@ -436,7 +436,7 @@ def lottery():
 def delete_message():
     if current_user is not None and hasattr(current_user, 'id'): #check if the user is logged
         if current_user.lottery_points >= POINT_NECESSARY:
-            _futureMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.delivery_date>datetime.datetime.today()).filter(Message.deleted==False).filter(Message.receiver_id==User.id)
+            _futureMessages = db.session.query(Message,User).filter(Message.sender_id == current_user.id).filter(Message.is_draft == False).filter(Message.delivery_date>date.today()).filter(Message.deleted==False).filter(Message.receiver_id==User.id)
             return render_template("delete_messages.html", futureMessages = _futureMessages.all()), 201
         else:
             return redirect('/mailbox')

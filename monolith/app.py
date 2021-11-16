@@ -7,8 +7,7 @@ from celery import Celery
 from flask_mail import Mail
 from flask_mail import Message as MessageFlask
 from celery.schedules import crontab
-from random import randint
-
+import random
 
 def make_celery(app):
     '''
@@ -217,7 +216,9 @@ def lottery():
             return False
 
         # Extract a random winner
-        winner = randint(0,len(list_participant)-1)
+        #winner = randint(0,len(list_participant)-1)
+        system_random = random.SystemRandom()
+        winner = system_random.randint(0,len(list_participant)-1)
         print("winner: " + str(winner))
 
         winner = list_participant[winner]
